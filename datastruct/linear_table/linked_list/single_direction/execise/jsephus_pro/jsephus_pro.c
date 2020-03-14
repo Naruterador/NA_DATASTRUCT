@@ -3,7 +3,7 @@
 #include <stdbool.h>
 
 /*
-循环链表解决Josephus problem（约瑟夫环问题）
+单向循环链表解决Josephus problem（约瑟夫环问题）
 
 */
 
@@ -33,11 +33,12 @@ pNode create_linked_list(int * data,int members)
     pNode pHead = (pNode)malloc(sizeof(pNode));
     if (NULL == pHead)
         exit(-1);
+    pHead->data = data[0];
     
     pNode pTail = pHead;
-    pTail->pNext = pHead;
+    pTail->pNext = NULL;
 
-    for(i;i < members;i++)
+    for(i = 1;i < members;i++)
     {
         pNode pNew =(pNode)malloc(sizeof(pNode));
         if(NULL == pNew)
@@ -51,60 +52,34 @@ pNode create_linked_list(int * data,int members)
     }
     pTail->pNext = pHead;
     return pHead;
-
 }
 
 
 void lineout(int * data,int members,int start,int count)
 {
+    //创建链表
     pNode pHead = create_linked_list(data,members);
+    pNode pTail;
     
-    
-    //1.找到开始报数的链表
-    
-    pNode pStart = pHead; 
-    int i = 0;
-    int j = 0;
-    int k = 0;
-    for(i;i < start;i++)
-        pStart = pStart->pNext;
-
-    pNode pEnd = pStart;
-    pNode pTemp1;
-    pNode pTemp2 = NULL;
-    //2.从start处开始出列
-    while(NULL != pHead->pNext->data)
-    {
-
-        for (j = 0;j < count;j++)
-        {   
-            if(j == (count - 2))
-                if(pEnd->pNext->pNext == pHead)
-                    pTemp2 = pEnd;
-            
-            if(j == (count - 1) && pEnd != pHead)
-                pTemp1 = pEnd;
-            
-            if(pHead == pEnd->pNext && j < (count - 1))
-            {
-                for(k = j;k < count;k++)
-                    pEnd = pEnd->pNext;
-                    pHead->pNext = pEnd->pNext;
-                    j++;
-                    pTemp1 = pEnd;
-            }
-
-            pEnd = pEnd->pNext;
-           
-        }
-        printf("%d\n",pTemp1->data);
-        if(NULL != pTemp2)
-        {
-            pTemp2->pNext = pHead;
-            pTemp2 = NULL;
-        }
-        pTemp1->data = NULL;
-
+    //找到第K个链表
+    pNode p = pHead;
+    while(p->data != start)
+    {    
+        p = p->pNext;
     }
-    
+    //从编号为p的人开始，只要有符合p->Next==p时，说明链表中除了p节点，所有编号都出列了
+    while(p->pNext != p)
+    {
+        int i;
+        //让节点p数m个位置
+        for(i = 1;i < count;i++)
+        {
+            pTail = p;
+            p = p->pNext;
+        }
+        pTail->pNext = p->pNext;
+        printf("%d\n",p->data);
+        p = pTail->pNext;
+    }
+    printf("%d\n",p->data);
 }

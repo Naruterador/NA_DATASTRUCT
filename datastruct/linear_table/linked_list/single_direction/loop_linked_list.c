@@ -35,6 +35,7 @@ struct Node * create_linked_list(int * val,int len)
 
     int i = 0;
     struct Node * pHead  =(struct Node *)malloc(sizeof(struct Node *));
+    pHead->data = val[0];
     
     if(NULL == pHead)
         exit(1);
@@ -42,7 +43,7 @@ struct Node * create_linked_list(int * val,int len)
     struct Node * pTail = pHead;
     pTail->pNext = pHead;
 
-    for(i;i < len;i++)
+    for(i = 1;i < len;i++)
     {
         struct Node * pNew = (struct Node *)malloc(sizeof(struct Node *));
         if(NULL == pNew)
@@ -50,11 +51,11 @@ struct Node * create_linked_list(int * val,int len)
         
         pNew->data = val[i];
         pTail->pNext = pNew;
-        pNew->pNext = pHead;
+        pNew->pNext = NULL;
         pTail = pNew;
 
     }
-
+    pTail->pNext = pHead;
     return pHead;
     
 }
@@ -65,8 +66,8 @@ void tarverse(struct Node * listNode)
     struct Node * ptNext = listNode;
     while(listNode != ptNext->pNext)
     {    
-        ptNext = ptNext->pNext;
         printf("%d\n",ptNext->data);
-       
-    }   
+        ptNext = ptNext->pNext;
+    }
+    printf("%d\n",ptNext->data);
 }
