@@ -21,8 +21,9 @@ int main(void)
     int a[5] = {1,2,3,4,5};
     pNode pHead = NULL;
     pHead = create_linked_list(a,5);
-    display(pHead);
-    //return 0;
+    lineoutall(pHead,3,3);
+    //display(pHead);
+    return 0;
 
 }
 
@@ -52,21 +53,64 @@ pNode create_linked_list(int * a,int len)
         pTail = pNew;
 
     }
-    //pTail->next = pHead;
-    //pHead->prior = pTail;
+    pTail->next = pHead;
+    pHead->prior = pTail;
     return pHead;
 }
 
 void display(pNode linkedlist)
 {
     pNode ptNext = linkedlist;
-    while(NULL != ptNext->next)
+    while(linkedlist != ptNext->next)
     {
         printf("%d\n",ptNext->data);
         ptNext = ptNext->next;
     }
     printf("%d\n",ptNext->data);
 }
+
+void lineoutall(pNode linkedlist,int start,int count)
+{
+    int i = 0;
+    pNode p = linkedlist;
+    pNode pTail;
+    //找到从哪里开始数（对应start的链表节点）
+    while(start != p->data)
+        p = p->next;
+
+    while(p != p->next)
+    {
+        
+        for(i = 1;i < count;i++)
+        {
+            pTail = p;
+            p = p->next;
+
+        }
+        pTail->next = p->next;
+        printf("%d\n",p->data);
+        p = pTail->next;
+
+    }
+    printf("%d\n",p->data);
+    free(p);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
