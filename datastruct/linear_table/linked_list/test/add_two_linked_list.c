@@ -206,9 +206,7 @@ pNode add(pNode list1,pNode list2)
         pNew->prior = pTail;
         pNew->next = NULL;
         pTail = pNew;
-        
-        i++;
-        
+         
     }
 
     if(lengthl2 == lengthl1)
