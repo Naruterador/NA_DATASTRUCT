@@ -18,7 +18,6 @@
 
 */
 
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -66,17 +65,29 @@ typedef struct signStack
 
 } * sStack;
 
+//创建数字栈函数
 void create_datastack(dStack);
+//创建符号栈函数
 void create_signstack(sStack);
+//数字栈压栈函数
 void push_datastack(dStack,int data);
+//符号栈圧栈函数
 void push_signstack(sStack,char sign,int priority);
+//数字栈出栈函数
 int pop_datastack(dStack);
+//符号栈出栈函数
 struct sign pop_signstack(sStack);
+//检测数字栈是否为空的函数
 bool is_dataempty(dStack);
+//检测符号栈是否为空的函数
 bool is_signempty(sStack);
+//下面2个函数是用于测试遍历栈函数
 void traverse_datastack(dStack);
 void traverse_signstack(sStack);
+
+//计算实现函数
 void Precede(dStack,sStack,char * strings);
+//操作运算符优先级检测函数
 int prioritycheck(char);
 
 
@@ -193,21 +204,23 @@ void Precede(dStack dsta,sStack ssta,char * strings)
     char tempadd;
     int add = 0;
     int n = 0;
+    //循环条件结束的条件为字符串遍历完成
     while('\0' != strings[i])
     {
-          
+        //检查当前字符串是否是数字
         if(isdigit(strings[i]))
         {   
             
             tempadd = strings[i];
             //这里直接用&strings会出现异常结果
             temp = atoi(&tempadd);
+            //这里if用于整合大于1位的数字
             if(0 == n)
                 add = temp;
             else
                 add = add * 10 + temp;
             n++;
-            
+            //当下一个字符串对象是符号的时候，进行压栈    
             if('X' == strings[i + 1] || '/' == strings[i + 1] || '+' == strings[i + 1] || '-' == strings[i + 1] || '\0' == strings[i + 1])
             {
                 push_datastack(dsta,add);
@@ -216,14 +229,16 @@ void Precede(dStack dsta,sStack ssta,char * strings)
                
             }
         }   
-
+        
+        //如果当前字符串是符号，并且符号栈为空的时候直接将符号压入符号栈
         if(is_signempty(ssta) && ('X' == strings[i] || '/' == strings[i] || '+' == strings[i] || '-' == strings[i]))
         {
                 push_signstack(ssta,strings[i],prioritycheck(strings[i]));
         }else{
+            //如果当前符号栈不为空的时候，对符号的优先级进行判断，这个IF判断小于等于的情况
             if((prioritycheck(strings[i]) <= ssta->pTop->csign.priority) && ('X' == strings[i] || '/' == strings[i] || '+' == strings[i] || '-' == strings[i]))
             {
-
+                //将数字栈里的数字依次出栈，根据符号栈中的符号进行运算
                 b = pop_datastack(dsta);
                 a = pop_datastack(dsta);
                 if('+' == ssta->pTop->csign.sign)
@@ -234,11 +249,14 @@ void Precede(dStack dsta,sStack ssta,char * strings)
                     r = a * b;
                 else if('/' == ssta->pTop->csign.sign)
                     r = a / b;
-
+                //将得出的重新压入数字栈
                 push_datastack(dsta,r);
+                //弹出运算的运算符
                 pop_signstack(ssta);
+                //压入当前的运算符
                 push_signstack(ssta,strings[i],prioritycheck(strings[i]));
             }
+            //如果当前运算符大于栈中的运算符则直接将运算符压入栈
             if((prioritycheck(strings[i]) > ssta->pTop->csign.priority) && ('X' == strings[i] || '/' == strings[i] || '+' == strings[i] || '-' == strings[i]))
             {  
             
@@ -249,7 +267,7 @@ void Precede(dStack dsta,sStack ssta,char * strings)
         i++;
 
     }
-    
+    //遍历完之后对栈的处理，如果符号栈为空则代表运算全部完成，直接弹出数字栈中的结果。如果不为空就要对2个栈继续做运算。
     if(is_signempty(ssta))
     {
         r = pop_datastack(dsta);
@@ -259,8 +277,10 @@ void Precede(dStack dsta,sStack ssta,char * strings)
         dNode q = dsta->pTop;
         while(ssta->pBottom != p)
         {
+            //弹出数字栈中数字
             b = pop_datastack(dsta);
             a = pop_datastack(dsta);
+            //根据符号栈中的运算符做运算，直到符号栈空为止。
             if('+' == p->csign.sign)
                 r = a + b;
             else if('-' == p->csign.sign)
