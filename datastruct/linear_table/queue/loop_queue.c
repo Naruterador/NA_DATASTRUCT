@@ -38,7 +38,7 @@ void insert_queue(pLsq,int val);
 int delete_queue(pLsq);
 void traverse(pLsq);
 void clearall(pLsq);
-
+int length(pLsq);
 bool is_empty(pLsq);
 bool is_full(pLsq);
 
@@ -55,8 +55,9 @@ int main(void)
     //val = delete_queue(&queue);
     //val = delete_queue(&queue);
     //printf("%d\n",val);
-    traverse(&queue);
-
+    //traverse(&queue);
+    val = length(&queue);
+    printf("%d\n",val);
     return 0;
 }
 
@@ -131,6 +132,22 @@ void traverse(pLsq qu)
     }
 
 }
+
+
+
+int length(pLsq qu)
+{
+    int length;
+    
+    length = (qu->rear - qu->front + qu->size) % qu->size;
+
+    return length;
+}
+
+
+
+
+
 
 void clearall(pLsq qu)
 {
