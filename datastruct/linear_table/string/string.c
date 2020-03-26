@@ -75,15 +75,14 @@ int main(void)
     SString T;
     SString V;
     StrAssign(S,"ABCDEFGHA");
-    StrAssign(T,"GGG");
+    StrAssign(T,"GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG");
 
     
-    StrDelete(S,1,2);
+    StrInsert(S,T,9);
     i = StrLength(S);
     
     printf("%s\n",S);
     printf("%d",i);
-    DestoryString(S);
     return 0;
 }
 
@@ -442,6 +441,44 @@ void Replace(SString S,SString T,SString V)
         }
 }
 
+/*
+高一凡Replace函数实现:
+// 此函数与串的存储结构无关
+Status Replace(SString S,SString T,SString V) 
+{ 
+//初始条件：串S，T和V存在，T是非空串
+//操作结果：用V替换主串S中出现的所有与T相等的不重叠的子串
+
+// 从串S的第一个字符起查找串T
+int i=1; 
+Status k;
+// T是空串
+if(StrEmpty(T)) 
+    return ERROR;
+do
+    {
+        //结果i为从上一个i之后找到的子串T的位置
+        i=Index(S,T,i); 
+        //串S中存在串T
+        if(i) 
+        {
+            StrDelete(S,i,StrLength(T)); // 删除该串T
+            k=StrInsert(S,i,V); // 在原串T的位置插入串V
+
+            if(!k) // 不能完全插入
+                return ERROR;
+
+            i+=StrLength(V); // 在插入的串V后面继续查找串T
+        }
+    }while(i);
+return OK;
+}
+
+*/
+
+
+
+
 void StrInsert(SString S,SString T,int pos)
 {
     if(pos < 1 || pos > S[0])
@@ -507,6 +544,14 @@ void StrInsert(SString S,SString T,int pos)
                 S[k] = tempmainS[k];
                 k++;
             }
+
+            if(k > MAX_STRING_LENGTH)
+            {
+                S[0] = MAX_STRING_LENGTH;
+                S[MAX_STRING_LENGTH + 1] = '\0';
+                break;
+            }
+
         }
        
 
@@ -523,6 +568,12 @@ void StrInsert(SString S,SString T,int pos)
             addSpos++;
             k++;
 
+        if(k > MAX_STRING_LENGTH)
+        {
+            S[0] = MAX_STRING_LENGTH;
+            S[MAX_STRING_LENGTH + 1] = '\0';
+            break;
+        }
         }
 
     }
