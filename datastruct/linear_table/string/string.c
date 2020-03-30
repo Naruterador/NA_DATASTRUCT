@@ -67,6 +67,12 @@ void StrDelete(SString,int pos,int len);
 //销毁字符串S
 void DestoryString(SString);
 
+//其它字符串匹配算法（不回溯主串的方式）KMP算法
+//每次平移的数组next获取函数
+int * get_next(SString T);
+//MKP算法的实现
+int KMP_go(SString,SString,int,int *);
+int * get_nextval(SString T);
 
 int main(void)
 {
@@ -74,15 +80,19 @@ int main(void)
     SString S;
     SString T;
     SString V;
-    StrAssign(S,"ABCDEFGHA");
-    StrAssign(T,"GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG");
+                //abaac
+    StrAssign(S,"ABACABADBCDHIJK");
+    StrAssign(T,"AACA");
+    int * next;
+    next = get_next(T);
+    for(int i = 0; i < 10;i++)
+        printf("%d\n",next[i]);
+    //i = KMP_go(S,T,1,next);
 
+    //printf("%d\n",i);
     
-    StrInsert(S,T,9);
-    i = StrLength(S);
     
-    printf("%s\n",S);
-    printf("%d",i);
+
     return 0;
 }
 
@@ -103,6 +113,7 @@ void StrAssign(SString T,char * strings)
         //非糖罐语法
         //T[i] = *(strings + i - 1);
     }
+
 }
 
 
@@ -604,7 +615,83 @@ void StrDelete(SString S,int pos,int len)
 }
 
 
-void DestoryString(SString S)
+
+
+
+
+//KMP算法的next实现
+int * get_next(SString T)
 {
-    free(S);
+
+    int i = 1;
+    int j = 0;
+    int * next = (int *)malloc(sizeof(int) * 10);
+    next[1] = 0;
+    while(i < T[0])
+    {
+        if(j == 0 || T[i] == T[j])
+        {
+                i++;
+                j++;
+                next[i] = j;
+        }
+        else
+        {
+                j = next[j];
+        }
+        
+    }
+    free(next);
+    return next;
+}
+
+//next优化算法
+int * get_nextval(SString T)
+{
+
+    int i = 1;
+    int j = 0;
+    int * next = (int *)malloc(sizeof(int) * 10);
+    next[1] = 0;
+    while(i < T[0])
+    {
+        if(j == 0 || T[i] == T[j])
+        {
+                i++;
+                j++;
+                if(T[i] != T[j])
+                    next[i] = j;
+                else
+                    next[i] = next[j];
+
+        }
+        else
+        {
+                j = next[j];
+        }
+        
+    }
+    free(next);
+    return next;
+}
+
+//KMP算法的实现
+int KMP_go(SString S,SString T,int pos,int * next)
+{
+    int j = 1;
+    int i = 1;
+    while(i <= S[0] && j <=T[0])
+    {
+        if(j == 0 || S[i] == T[j])
+        {
+            i++;
+            j++;
+        }else
+            j = next[j];
+    }
+    if(j > T[0])
+    {
+        return i - T[0];
+    }
+    return 0;
 }

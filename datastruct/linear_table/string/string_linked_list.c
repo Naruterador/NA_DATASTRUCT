@@ -413,7 +413,7 @@ void Replace(struct LString * S,struct LString * T,struct LString * V)
             break;
         *S = StrDelete(S,i,T->len);
         
-        //修复在末尾插入值
+        //这个if用于修复在末尾插入无法插入的问题
         if(i == S->len + 1)
         {
             S->len++;
