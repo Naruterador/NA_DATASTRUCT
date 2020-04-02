@@ -13,7 +13,7 @@ int main(void)
 {
     int a;
     a = find_MAX(5,1,2,3,4,10);
-    
+    printf("%d\n",a); 
 
     return 0;
 }
