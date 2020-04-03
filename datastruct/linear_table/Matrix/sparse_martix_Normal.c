@@ -228,6 +228,8 @@ int comp(int a,int b)
 }
 
 //求稀疏矩阵的和
+//原理：将矩阵M和矩阵N中的非零数组相加，放到新的矩阵Q中，新矩阵的非零元素数量为元素多的那个矩阵
+//矩阵相加时，只有2个值相同才会发生相加运算，否则就取坐标较小的值
 void AddMatrix(struct Matrix * M,struct Matrix * N,struct Matrix * Q)
 {
     int m = 1;
