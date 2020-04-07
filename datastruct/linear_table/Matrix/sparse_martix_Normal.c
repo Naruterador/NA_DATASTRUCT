@@ -90,6 +90,7 @@ void CreateMatrix(struct Matrix * ma)
     int row = 0;
     int col = 0;
     int eleV = 0;
+    int k = 0;
     
     printf("请输入矩阵的总行数，总列数，以及非零元素的个数，格式为d,d,d:");
     scanf("%d,%d,%d",&ma->row,&ma->column,&ma->countele);
@@ -119,9 +120,9 @@ void CreateMatrix(struct Matrix * ma)
     ma->data[i].evalue = 0;
     for(i = 1;i <= ma->countele;i++)
     {
-        int k = 0;
+        
         do{
-
+            k = 0;
             printf("请输入一个节点的横坐标值，纵坐标值，以及元素的值，格式为d,d,d:");
             scanf("%d,%d,%d",&row,&col,&eleV);
             

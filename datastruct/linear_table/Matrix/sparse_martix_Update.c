@@ -52,8 +52,11 @@ void PrintRSLMatrix(struct RSLMatrix *);
 void PrintRSLMatrixOrigin(struct RSLMatrix *);
 void AddRSLMatrix(struct RSLMatrix * M,struct RSLMatrix * N,struct RSLMatrix * T);
 void SubRSLMatrix(struct RSLMatrix * M,struct RSLMatrix * N,struct RSLMatrix * T);
-void MulSMatrix(struct RSLMatrix * M,struct RSLMatrix * N,struct RSLMatrix * T);
-void TransposeRSLMatrix(struct RSLMatrix * M,struct RSLMatrix * T);
+void MulSMatrixNor(struct RSLMatrix * M,struct RSLMatrix * N,struct RSLMatrix * T,struct RSLMatrix * Q);
+void MulSMatrixUpd(struct RSLMatrix * M,struct RSLMatrix * N,struct RSLMatrix * T);
+void TransposeRSLMatrixNor(struct RSLMatrix * M,struct RSLMatrix * T);
+void TransposeRSLMatrixUpd1(struct RSLMatrix * M,struct RSLMatrix * T);
+void TransposeRSLMatrixUpd2(struct RSLMatrix * M,struct RSLMatrix * T);
 
 
 int main(void)
@@ -61,11 +64,16 @@ int main(void)
     struct RSLMatrix M;
     struct RSLMatrix N;
     struct RSLMatrix T;
+    struct RSLMatrix Q;
     
     CreateRSLMatrix(&M);
     //CreateRSLMatrix(&N);
+    //MulSMatrixNor(&M,&N,&T,&Q);
+    //MulSMatrixUpd(&M,&N,&T);
+    TransposeRSLMatrixUpd2(&M,&T);
+    //CreateRSLMatrix(&N);
     //AddRSLMatrix(&M,&N,&T);
-    //PrintRSLMatrix(&T);
+    PrintRSLMatrix(&T);
     return 0;
 }
 
@@ -78,28 +86,28 @@ void CreateRSLMatrix(struct RSLMatrix * ma)
     int i = 0;
     int k = 0;
     int j = 0;
+    
 
-    printf("请输入矩阵的总行数，总列数，以及总元素个数,格式为d,d,d:");
+    printf("请输入矩阵的总行数，总列数，以及非零元素的个数，格式为d,d,d:");
     scanf("%d,%d,%d",&ma->rowc,&ma->colc,&ma->eleco);
     
-    if(ma->rowc < 1 || ma->colc < 1 || ma->eleco > MAX_SIZE)
+    //检查非零元素总个数是否大于最大非零元素个数
+    if(ma->eleco > MAX_SIZE)
     {
-        printf("ERROR：矩阵创建失败");
+        printf("ERROR:非零元素个数超过上限");
         exit(1);
     }
     
     ma->ma[i].i = 0;
     ma->ma[i].j = 0;
     ma->ma[i].e = 0;
-    //输入每个元素在矩阵中的位置和值
-    for(i = 1;i <= ma->eleco;i++)
-    {
-        k = 0;
+
+    for(i = 1;i<= ma->eleco;i++)
+    {   
         do{
-            printf("输入第%d个非零元素的横坐标值,纵坐标值,参数值,格式为d,d,d:",i);
+            printf("请输出第%d个非零元素的横坐标值,纵坐标值,参数值,格式为d,d,d:",i);
             scanf("%d,%d,%d",&ma->ma[i].i,&ma->ma[i].j,&ma->ma[i].e);
-            
-            if(ma->ma[i].i < 1 || ma->ma[i].j < 1)
+            if(ma->ma[i].i < 1 || ma->ma[i].j < 1 || ma->ma[i].i > ma->rowc || ma->ma[i].j > ma->colc)
             {
                 printf("ERROR:1");
                 k = 1;
@@ -112,8 +120,6 @@ void CreateRSLMatrix(struct RSLMatrix * ma)
             }
         }while(k);        
     }
-
-    //处理rpos用于记录每一行第一个非零元素的位置
     
     //为rpos元素预赋值
     ma->rpos[0] = 0;
@@ -280,6 +286,295 @@ void AddRSLMatrix(struct RSLMatrix * M,struct RSLMatrix * N,struct RSLMatrix * T
 
     }
 }
+
+
+
+void SubRSLMatrix(struct RSLMatrix * M,struct RSLMatrix * N,struct RSLMatrix * T)
+{
+    int i = 1;
+    for(i = 1;i <= N->eleco;i++)
+    {
+        N->ma[i].e = N->ma[i].e * -1;
+    }
+    AddRSLMatrix(M,N,T);
+}
+
+//矩阵转置的普通做法
+void TransposeRSLMatrixNor(struct RSLMatrix * M,struct RSLMatrix * T)
+{
+    int m = 1;
+    int n = 1;
+    int q = 1;
+    T->eleco = M->eleco;
+    T->rowc = M->colc;
+    T->colc = M->rowc;
+    for(m = 1;m <= M->colc;m++)
+        for(n = 1;n <= M->eleco;n++)
+        {
+            if(m == M->ma[n].i)
+            {
+                T->ma[q].i = M->ma[n].j;
+                T->ma[q].j = M->ma[n].i;
+                T->ma[q].e = M->ma[n].e;
+                q++;
+            }
+        }
+}
+
+
+void TransposeRSLMatrixUpd1(struct RSLMatrix * M,struct RSLMatrix * T)
+{
+    int m = 1;
+    int n = 1;
+    int col = 1;
+    int q = 1;
+    int * countcol;
+    int * cpot;
+    
+    T->colc = M->rowc;
+    T->rowc = M->colc;
+    T->eleco = M->eleco;
+    
+    countcol =(int *)malloc(sizeof(int) * (M->colc + 1));
+    cpot = (int *)malloc(sizeof(int) * (M->colc + 1));
+    
+    //计算矩阵M每列的元素数量
+    for(m = 1;m <= M->eleco;m++)
+        ++countcol[M->ma[m].j];
+    
+    //初始化cpot的值
+    for(m = 1;m <= M->colc;m++)
+        cpot[m] = 0;
+    
+    //计算矩阵M转置之后没一个非0元素的新位置
+    cpot[1] = 1;
+    for(n = 2;n <= M->colc;n++)
+        cpot[n] = cpot[n - 1] + countcol[n - 1];
+    
+    for(m = 1;m <= M->eleco; m++)
+    {
+        n = M->ma[m].j;
+        col = cpot[n];
+        
+        T->ma[col].j = M->ma[m].i;
+        T->ma[col].i = M->ma[m].j;
+        T->ma[col].e = M->ma[m].e;
+        cpot[n]++;
+    }
+    
+
+    //初始化T-rpos的值
+    for(m = 1;m <= T->rowc;m++)
+        T->rpos[m] = 0;
+
+    //计算每一行的非零元素个数
+    for(m = 1;m <= M->eleco;m++)
+       ++T->rpos[T->ma[m].i];
+    
+    //计算rpos
+    for(m = T->rowc;m >= 1;m--)
+    {
+        T->rpos[m] = 1;
+        for(n = m - 1;n >= 1;n--)
+            T->rpos[m] = T->rpos[m] + T->rpos[n];
+    }
+}
+
+
+void TransposeRSLMatrixUpd2(struct RSLMatrix * M,struct RSLMatrix * T)
+{
+    int i;
+    int j;
+    int m;
+    int n;
+    int * num;
+    
+    T->rowc = M->colc;
+    T->colc = M->rowc;
+    T->eleco = M->eleco;
+
+    
+    num =(int *)malloc(sizeof(int) * (M->colc + 1));
+    
+    if(T->eleco)
+    {
+        for(i = 1;i <= M->colc;i++)
+            num[i] = 0;
+        
+        for(i = 1;i <=M->eleco;i++)
+            ++num[M->ma[i].j];
+        
+        T->rpos[1] = 1;
+        for(j = 2;j <= M->colc;j++)
+            T->rpos[j] = T->rpos[j - 1] + num[j - 1];
+
+        
+        for(j = 1; j <= M->colc;j++)
+            num[j] = T->rpos[j];
+        
+        for(j = 1;j <= M->eleco;j++)
+        {
+            m = M->ma[j].j;
+            n = num[m];
+            
+            T->ma[n].i = M->ma[j].j;
+            T->ma[n].j = M->ma[j].i;
+            T->ma[n].e = M->ma[j].e;
+            ++num[m];
+        }
+
+    free(num);
+
+    }
+
+}
+
+void MulSMatrixNor(struct RSLMatrix * M,struct RSLMatrix * N,struct RSLMatrix * T,struct RSLMatrix * Q)
+{
+    int * Nc;
+    int * Tc;
+    
+    int m = 1;
+    int n = 1;
+    int q = 1;
+
+
+
+    //判断2个矩阵是否可以做相乘运算
+    if(M->rowc != N->colc)
+    {
+        printf("ERROR:这个2个矩阵无法进行相乘！");
+        exit(1);
+    }
+    //初始化矩阵T的非零元素属性
+    T->rowc = N->colc;
+    T->colc = M->rowc;
+    T->eleco = 0;
+    
+    //矩阵N每一行的非零元素值
+    Nc = (int *)malloc(sizeof(int) * (N->rowc + 1));
+    //保存相乘之后的值
+    Tc = (int *)malloc(sizeof(int) * (M->colc + 1));
+    
+    //核心部分
+    for(m = 1;m <= N->colc;m++)
+    {
+        //初始化Nc的值
+        for(n = 1;n <= N->rowc;n++)
+            Nc[n] = 0;
+        
+        //初始化Tc的值
+        for(n = 1;n <= M->colc;n++)
+            Tc[n] = 0;
+        
+        //求出Nc的值
+        for(n = 1;n <= N->eleco;n++ )           
+            if(m == N->ma[n].j)
+                Nc[N->ma[n].i] = N->ma[n].e;
+
+
+        //求出Tc的值
+        for(n = 1;n <= N->eleco; n++)
+        {
+            Tc[M->ma[n].i] = Tc[M->ma[n].i] + M->ma[n].e * Nc[M->ma[n].j];
+        }
+        
+        for(n = 1;n <= T->colc; n++)
+        if(Tc[n] != 0)
+        {
+            T->eleco++;
+            T->ma[q].e = Tc[n];
+            T->ma[q].i = m;
+            T->ma[q].j = n;
+            q++;
+        }
+    }
+    TransposeRSLMatrixUpd1(T,Q);
+    free(Nc);
+    free(Tc);
+}
+
+
+
+void MulSMatrixUpd(struct RSLMatrix * M,struct RSLMatrix * N,struct RSLMatrix * T)
+{
+    int arow;
+    int brow;
+    int col;
+    int p;
+    int q;
+    int tp;
+    int tq;
+    //相乘后的结果
+    int ctemp[MAX_RC + 1];
+    int m;
+    int n = 1;
+    int i = 1;
+    
+    //判断是否可以进行矩阵相乘操作
+    if(M->rowc != N->colc)
+    {
+        printf("ERROR:不能进行矩阵相乘");
+        exit(1);
+    }
+
+    T->rowc = M->rowc;
+    T->colc = N->colc;
+    T->eleco = 0;
+
+    for(arow = 1; arow <= M->rowc; arow++)
+    {
+        //清空累计器
+        for(col = 1;col <= i;col++)
+            ctemp[col] = 0;
+
+        T->rpos[arow] = T->eleco + 1;
+        
+        //循环结束点为
+        if(arow < M->rowc)
+            tp = M->rpos[arow + 1];
+        else
+            tp = M->eleco + 1;
+
+        for(p = M->rpos[arow];p < tp; p++)
+        {
+            brow = M->ma[p].j;
+            
+            if(brow < N->rowc)
+                tq = N->rpos[brow + 1];
+            else
+                tq = N->eleco + 1;
+            for(q = N->rpos[brow];q < tq;q++)
+            {
+                col = N->ma[q].j;
+                ctemp[col] = ctemp[col] + M->ma[p].e * N->ma[q].e;
+
+            }
+        }
+
+        for(i = 1; i<= col;i++)
+        {
+            if(ctemp[i] != 0)    
+            {
+                if(T->eleco > MAX_SIZE)
+                {
+                    printf("ERROR:非零数组元素个数超过最大值！");
+                    exit(1);
+                }
+                
+                T->ma[n].i = arow;
+                T->ma[n].j = i;
+                T->ma[n].e = ctemp[i];
+                T->eleco++;
+                n++;
+            }
+        }
+        
+    }    
+}
+
+
+
 
 
 
