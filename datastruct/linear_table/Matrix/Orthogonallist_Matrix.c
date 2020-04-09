@@ -45,7 +45,8 @@ void InsertAscend(CrossList *,OLink);
 void CreateMatrix(CrossList *);
 //打印当前的矩阵
 void PrintMatrix(CrossList *); 
-
+//按照数组的样式打印当前矩阵
+void PrintMatrixOri(CrossList *); 
 
 int main(void)
 {
@@ -53,7 +54,8 @@ int main(void)
     CrossList M;
     InitSMatrix(&M);
     CreateMatrix(&M);
-    PrintMatrix(&M);
+    //PrintMatrix(&M);
+    PrintMatrixOri(&M);
 
 
 
@@ -204,4 +206,31 @@ void PrintMatrix(CrossList * M)
         }
     }
     
+}
+
+
+
+void PrintMatrixOri(CrossList * M)
+{
+    int i = 1;
+    int j = 1;
+    OLink q;
+    for(i = 1;i <= M->rowcount;i++)
+    {
+        q = M->rhead[i];
+        for(j = 1; j <= M->columncount;j++)
+        {
+            if(j == q->j)
+            {
+                printf("%d ",q->e);
+                if(q->right)
+                    q = q->right;
+            }
+            else
+                printf("%d ",0);
+        }
+        printf("\n");
+
+    }
+
 }
