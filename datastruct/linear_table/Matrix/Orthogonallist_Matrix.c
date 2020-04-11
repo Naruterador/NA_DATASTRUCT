@@ -47,18 +47,36 @@ void CreateMatrix(CrossList *);
 void PrintMatrix(CrossList *); 
 //按照数组的样式打印当前矩阵
 void PrintMatrixOri(CrossList *); 
+//矩阵相加
+void AddMatrix(CrossList *,CrossList *,CrossList *);
+//相加比较的辅助函数
+int comp(int,int);
+//矩阵相减
+void SubMatrix(CrossList *,CrossList *,CrossList *);
+//转置矩阵
+void TransposeMatrix(CrossList *,CrossList *);
+//矩阵相乘以
+void MultiSmatrix(CrossList *,CrossList *,CrossList *);
+
+
+
 
 int main(void)
 {
 
-    CrossList M;
-    InitSMatrix(&M);
-    CreateMatrix(&M);
+    CrossList C1;
+    CrossList C2;
+    CrossList C3;
+    InitSMatrix(&C1);
+    InitSMatrix(&C2);
+    CreateMatrix(&C1);
+    CreateMatrix(&C2);
     //PrintMatrix(&M);
-    PrintMatrixOri(&M);
-
-
-
+    //AddMatrix(&C1,&C2,&C3);
+    //SubMatrix(&C1,&C2,&C3);
+    //TransposeMatrix(&C1,&C2);
+    MultiSmatrix(&C1,&C2,&C3);
+    PrintMatrix(&C3);
     return 0;
 
 }
@@ -218,15 +236,23 @@ void PrintMatrixOri(CrossList * M)
     for(i = 1;i <= M->rowcount;i++)
     {
         q = M->rhead[i];
-        for(j = 1; j <= M->columncount;j++)
+        if(q)
         {
-            if(j == q->j)
+            for(j = 1; j <= M->columncount;j++)
             {
-                printf("%d ",q->e);
-                if(q->right)
-                    q = q->right;
+                if(j == q->j)
+                {
+                    printf("%d ",q->e);
+                    if(q->right)
+                        q = q->right;
+                }   
+                else
+                    printf("%d ",0);
             }
-            else
+        }
+        else
+        {
+            for(j = 1;j <= M->columncount;j++)
                 printf("%d ",0);
         }
         printf("\n");
@@ -234,3 +260,238 @@ void PrintMatrixOri(CrossList * M)
     }
 
 }
+
+
+int comp(int a,int b)
+{
+    if(a < b)
+        return -1;
+    else if(a > b)
+        return 1;
+    else
+        return 0;
+}
+
+
+void AddMatrix(CrossList * C1,CrossList * C2,CrossList * C3)
+{
+   int c1 = 1;
+   int c2 = 1;
+   int c3row;
+   int c3col;
+   OLink qc1;
+   OLink qc2;
+   OLink qc3;
+   if(C1->rowcount != C2->rowcount || C1->columncount != C2->columncount)
+   {
+        printf("ERROR:2种不同类型的矩阵");
+        exit(1);
+
+   }
+   //初始化C3矩阵
+   if(C1->rowcount > C2->rowcount)
+        c3row = C1->rowcount;
+   else if(C1->rowcount < C2->rowcount)
+        c3row = C2->rowcount;
+   else
+        c3row = C2->rowcount;
+
+   if(C1->columncount > C1->columncount)
+        c3col = C1->columncount;
+   else if(C1->columncount < C1->columncount)
+        c3col = C2->columncount;
+   else
+        c3col = C2->columncount;
+   InitSMatrix(C3);
+   C3->rowcount = c3row;
+   C3->columncount = c3col;
+   C3->elementcount = 0;
+   InitSMatrixList(C3);
+    
+    while(c1 <= C1->rowcount && c2 <= C2->rowcount)
+    {
+      qc1 = C1->rhead[c1];
+      qc2 = C2->rhead[c2];
+      
+      while(qc1 && qc2)
+      { 
+        if(qc1->i < qc2->i)
+        {
+            InsertAscend(C3,qc1); 
+        }
+        else if(qc1->i > qc2->i)
+        {
+            InsertAscend(C3,qc2);  
+        }
+        else if(qc1->i == qc2->i)
+        {
+            if(qc1->j < qc2->j)
+                InsertAscend(C3,qc1);
+            else if(qc1->j > qc2->j)
+                InsertAscend(C3,qc2);
+            else if(qc1->j == qc2->j)
+            {
+                qc3 = (OLink)malloc(sizeof(struct OLNode));
+                if(NULL == qc3)
+                {
+                    printf("Can not assign the space for qc3!");
+                    exit(1);
+
+                }
+                qc3->i = qc1->i;
+                qc3->j = qc1->j;
+                qc3->e = qc1->e + qc2 ->e;
+                if(qc3->e == 0)
+                {
+                    qc1 = qc1->right;
+                    qc2 = qc2->right;
+                    continue;
+                }
+                else
+                    InsertAscend(C3,qc3);
+            }
+         }
+            qc1 = qc1->right;
+            qc2 = qc2->right;
+            C3->elementcount++;
+       }
+        c1++;
+        c2++;
+     }
+
+     //处理矩阵C1和矩阵C2中剩下的值
+     while(c1 <= C1->rowcount)
+     {
+        qc1 = C1->rhead[c1];
+        while(qc1)
+        {
+          InsertAscend(C3,qc1);
+          qc1 = qc1->right;
+          C3->elementcount++;
+        }
+
+        c1++;
+
+     }
+     
+    while(c2 <= C2->rowcount)
+    {
+        qc2 = C2->rhead[c2];
+        while(qc2)
+        {
+            InsertAscend(C3,qc2);
+            qc2 = qc2->right;
+            C3->elementcount++;
+        }
+
+        c2++;
+    }
+
+}
+
+
+void SubMatrix(CrossList * C1,CrossList * C2,CrossList * C3)
+{
+    int c1;
+    int c2;
+    int i = 1;
+    OLink q;
+    for(i = 1;i <= C2->rowcount;i++)
+    {
+        q = C2->rhead[i];
+        while(q)
+        {
+            q->e = q->e * -1;
+            q = q->right;
+        }
+    }
+    AddMatrix(C1,C2,C3);
+}
+
+
+
+void TransposeMatrix(CrossList * C1,CrossList * C2)
+{
+    InitSMatrix(C2);
+    C2->rowcount = C1->columncount;
+    C2->columncount = C1->rowcount;
+    C2->elementcount = C1->elementcount;
+    InitSMatrixList(C2);
+
+    int i;
+    OLink q;
+    OLink p;
+    for(i = 1;i <= C1->rowcount;i++)
+    {
+        q = C1->rhead[i];
+        while(q)
+        {
+            p =(OLink)malloc(sizeof(struct OLNode));
+            if(NULL == p)
+            {
+                printf("Can not assign the space for p");
+                exit(1);
+            }
+            p->i = q->j;
+            p->j = q->i;
+            p->e = q->e;
+            InsertAscend(C2,p);
+            q = q->right;
+        }
+    }
+
+}
+
+
+
+
+void MultiSmatrix(CrossList * C1,CrossList * C2,CrossList * C3)
+{
+    if(C1->rowcount != C2->columncount)
+    {
+        printf("ERROR:这两个矩阵不符合相乘的要求！");
+        exit(1);
+    }
+    InitSMatrix(C3);
+    C3->rowcount = C1->columncount;
+    C3->columncount = C2->rowcount;
+    C3->elementcount = 0;
+    InitSMatrixList(C3);
+    
+    OLink q;
+    OLink p;
+    OLink pnew;
+    int temp = 0;
+    
+    int i;
+    int j = 1;
+
+    for(j = 1;j <= C1->rowcount;j++)
+    {
+        for(i = 1;i <= C2->columncount;i++)
+        {
+
+            q = C1->rhead[j];
+            p = C2->chead[i];
+        
+            while(q && p)
+            {
+                temp = temp + (q->e * p->e);
+                q = q->right;
+                p = p->down;
+            }
+            pnew = (OLink)malloc(sizeof(struct OLNode));
+            if(NULL == pnew)
+            {
+                printf("Can not assign the space for pnew!");
+                exit(1);
+            }
+            pnew->i = j;
+            pnew->j = i;
+            pnew->e = temp;
+            InsertAscend(C3,pnew);
+            temp = 0;
+        }   
+    }   
+}
+
