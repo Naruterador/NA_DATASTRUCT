@@ -73,7 +73,7 @@ int * get_next(SString T);
 //MKP算法的实现
 int KMP_go(SString,SString,int,int *);
 int * get_nextval(SString T);
-
+/*
 int main(void)
 {
     int i = 1;
@@ -111,7 +111,7 @@ int main(void)
 
     return 0;
 }
-
+*/
 void StrAssign(SString T,char * strings)
 {
     int i = 1;
@@ -177,6 +177,9 @@ void ClearString(SString T)
         printf("The String is empty!");
         exit(1);
     }
+    int len = T[0];
+    for(int i = 1;i <= len;i++)
+        T[i] = '\0';
     T[0] = 0;
 }
 

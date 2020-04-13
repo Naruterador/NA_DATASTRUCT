@@ -68,15 +68,15 @@ int main(void)
     CrossList C2;
     CrossList C3;
     InitSMatrix(&C1);
-    InitSMatrix(&C2);
+    //InitSMatrix(&C2);
     CreateMatrix(&C1);
-    CreateMatrix(&C2);
+    //CreateMatrix(&C2);
     //PrintMatrix(&M);
     //AddMatrix(&C1,&C2,&C3);
     //SubMatrix(&C1,&C2,&C3);
     //TransposeMatrix(&C1,&C2);
-    MultiSmatrix(&C1,&C2,&C3);
-    PrintMatrix(&C3);
+    //MultiSmatrix(&C1,&C2,&C3);
+    PrintMatrix(&C1);
     return 0;
 
 }
@@ -102,14 +102,14 @@ void InitSMatrixList(CrossList * M)
     int i = 1;
     
     //横坐标节点创建空间，根据最大行数
-    M->rhead = (OLink *)malloc(sizeof(OLink) * (M->rowcount + 1));
+    M->rhead = (OLink *)malloc(sizeof(struct OLNode) * (M->rowcount + 1));
     if(NULL == M->rhead)
     {
         printf("ERROR: Can not assign space for M->rhead");
         exit(1);
     }
     //纵坐标节点创建空间，根据最大列数
-    M->chead = (OLink *)malloc(sizeof(OLink) * (M->columncount + 1));
+    M->chead = (OLink *)malloc(sizeof(struct OLNode) * (M->columncount + 1));
     if(NULL == M->chead)
     {
         printf("ERROR:Can not assign the space for M->chead");
