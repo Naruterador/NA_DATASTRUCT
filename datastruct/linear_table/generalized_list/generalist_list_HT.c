@@ -3,9 +3,12 @@
 广义表的实现
 
 */
-#include <stdlib.h>
+#if defined(__caplusplus)
+#define NULL 0
+#else
+#define NULL ((void *)0)
+#endif
 #include "mystring.h"
-#include <stdbool.h>
 
 typedef char AtomType;
 
@@ -15,30 +18,20 @@ enum ElemTag{ATOM,LIST};    //创建一个枚举ATOM表示单一原子，LIST表
 typedef struct GLNode
 {
     enum ElemTag tag;    //广义表的元素类型，是原子或者一个子表
+    AtomType atom;
     union
     {
-        AtomType atom; //原子节点的值域
-
-        struct GLNode *hp; //广义表的头节点指针
-        struct GLNode *tp; //广义表的尾节点指针
+        //AtomType atom; //原子节点的值域
+        struct GLNode * hp; //广义表的头节点指针
+        struct GLNode * tp; //广义表的尾节点指针
     }ptr;
 
-}* GList,GLNode;
+}* GList;
 
 
 
-//广义表的扩展线性链表存储表示
-typedef struct GLNode1
-{
-    enum ElemTag tag;   //广义表节点类型
-    union
-    {
-        AtomType atom;
-        struct GLNode1 * hp;
-    }ptr;
 
-    struct GLNode1 * tp;
-}* GList1,GLNode1;
+
 
 
 //广义表输入字符串处理函数
@@ -52,30 +45,33 @@ void DestroyGList(GList);
 //复制广义表
 void CopyGList(GList,GList);
 //返回广义表的长度
-void GListLength(GList);
+int GListLength(GList);
 //返回广义表的深度
 void GListDepth(GList);
 //判断广义表是否为空
 bool is_empty(GList);
 //获取广义表的表头
-GList1 GetHead(GList);
+GList GetHead(GList);
 //获取广义表的表尾
-GList1 GetTail(GList);
+GList GetTail(GList);
 //向广义表中插入结点
 void InsertFirst(GList,GList);
 //删除广义表中的结点
 void DeleteFirst(GList,GList);
 //利用递归算法遍历广义表
-void Traverse_GL(GList,void(*v)(AtomType));
+void Traverse_GL(GList);
 
 int main(void)
 {
+    int len;
     GList G;
     SString str;
     SString hstr;
-    StrAssign(str,"(a,(b,c,d))");
+    StrAssign(str,"(a)");
     InitGList(G);
     CreateGList(G,str);
+    len = GListLength(G);
+    //Traverse_GL(G);
     return 0;
 }
 
@@ -150,16 +146,16 @@ void CreateGList(GList G,SString expression)
         G = NULL;
     else
     {
-        G =(GList)malloc(sizeof(struct GLNode1)); //为广义表的结点分配空间
+        G =(GList)malloc(sizeof(struct GLNode)); //为广义表的结点分配空间
         if(NULL == G)
         {
-            printf("ERROR:Can not assign the space for GList1");
+            printf("ERROR:Can not assign the space for GList");
             exit(1);
         }
         if(1 == len) //判断广义表长度是否为1，如果为1表示只有1个值，就直接创建1个结点
         {
             G->tag = ATOM;
-            G->ptr.atom = S[1];
+            G->atom = expression[1];
         }else{
             G->tag = LIST; //创建1个子表
             p = G;
@@ -171,13 +167,13 @@ void CreateGList(GList G,SString expression)
                 q = p;
                 if(!StrEmpty(sub)) //判断表是否结束
                 {
-                    p = (GList)malloc(sizeof(struct GLNode1));
+                    p = (GList)malloc(sizeof(struct GLNode));
                     if(NULL == p)
                     {
                         printf("ERROR: can not assign the space for p!");
                         exit(1);
                     }
-                    p->tag = LIST;
+                    p->tag = 1;
                     q->ptr.tp = p;
                 }
                 }while(!StrEmpty(sub));
@@ -187,3 +183,38 @@ void CreateGList(GList G,SString expression)
     }
 
 }
+
+
+int GListLength(GList G)
+{
+    int i = 0;
+    while(G)
+    {
+        G = G->ptr.tp;
+        i++;
+    }
+
+    return i;
+
+}
+
+
+
+
+
+
+void Traverse_GL(GList G)
+{
+    if(G)
+    {
+        if(G->tag == ATOM)
+            printf("%c",G->atom);
+        else
+            {
+                Traverse_GL(G->ptr.hp);
+                Traverse_GL(G->ptr.tp);
+            }
+    }
+}
+
+
