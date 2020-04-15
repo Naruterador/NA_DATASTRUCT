@@ -17,15 +17,18 @@ typedef struct GLNode
     union
     {
         AtomType atom;
-        struct GLNode * hp;
-    }ptr;
+        struct
+        {
+            struct GLNode * hp;
+        }ptr;
+    }a;
     
     struct GLNode * tp;
 }* GList;
 
 void server(SString,SString);
-void InitGlist(GList);
-void CreateGlist(GList,SString);
+void InitGlist(GList *);
+void CreateGlist(GList *,SString);
 int  GlistLength(GList);
 
 
@@ -33,10 +36,10 @@ int main(void)
 {
     int len;
     GList G;
-    InitGlist(G);
+    InitGlist(&G);
     SString S;
-    StrAssign(S,"(a,b,b,d,e)");
-    CreateGlist(G,S);
+    StrAssign(S,"(a,(b,c,d))");
+    CreateGlist(&G,S);
     len = GlistLength(G);
     printf("%d",len);
 
@@ -52,7 +55,7 @@ void server(SString str,SString hstr)
     SString c1;
     SString c2;
     SString c3;
-    SString temp;    
+    SString temp;  
     StrAssign(c1,",");
     StrAssign(c2,"(");
     StrAssign(c3,")");
@@ -88,22 +91,22 @@ void server(SString str,SString hstr)
     }
 }
 
-void InitGlist(GList G)
+void InitGlist(GList * G)
 {
-    G = NULL;
+    *G = NULL;
 }
 
 
 
-void CreateGlist(GList G,SString S)
+void CreateGlist(GList * G,SString S)
 {
     SString sub;
     SString hs;
     SString emp;
     GList p;
     StrAssign(emp,"()");
-    G = (GList)malloc(sizeof(struct GLNode));
-    if(NULL == G)
+    *G = (GList)malloc(sizeof(struct GLNode));
+    if(NULL == *G)
     {
         printf("ERROR:can not assign the space for G!");
         exit(1);
@@ -111,29 +114,30 @@ void CreateGlist(GList G,SString S)
     
     if(!StrCompare(S,emp))
     {
-        G->tag = LIST;
-        G->ptr.hp = NULL;
-        G->tp = NULL;
+        (*G)->tag = LIST;
+        (*G)->a.ptr.hp = NULL;
+        (*G)->tp = NULL;
     }else{
         if(1 == StrLength(S))
         {
-            G->tag = ATOM;
-            G->ptr.atom = S[1];
-            G->tp = NULL;
+            (*G)->tag = ATOM;
+            (*G)->a.atom = S[1];
+            (*G)->a.ptr.hp = NULL;
+            (*G)->tp = NULL;
         }else{
 
-            G->tag = LIST;
-            G->tp = NULL;
+            (*G)->tag = LIST;
+            (*G)->tp = NULL;
             SubString(sub,S,2,StrLength(S) - 2);
             server(sub,hs);
-            CreateGlist(G->ptr.hp,hs);
-            p = G->ptr.hp;
+            CreateGlist(&(*G)->a.ptr.hp,hs);
+            p =(*G)->a.ptr.hp;
 
             
             while(!StrEmpty(sub))
             {    
                 server(sub,hs);
-                CreateGlist(p->tp,hs);
+                CreateGlist(&p->tp,hs);
                 p = p->tp;
             }
 
@@ -144,15 +148,11 @@ void CreateGlist(GList G,SString S)
 }
 
 
-
-
-
-
 int  GlistLength(GList G)
 {
     int i = 0;
-    GList p = G->ptr.hp;
-    while(p || G->tag == LIST)
+    GList p = G->a.ptr.hp;
+    while(p)
     {
         i++;
         p = p->tp;
