@@ -32,11 +32,6 @@ typedef struct GLNode
 }* GList,GLNode;
 
 
-
-
-
-
-
 //广义表输入字符串处理函数
 void server(SString str,SString hstr);
 //初始化广义表
