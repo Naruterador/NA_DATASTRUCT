@@ -52,13 +52,34 @@ void ClearTree(SqBiTree);    //清空一棵树
 bool IsTreeEmpty(SqBiTree);  //判断树是否为空
 int TreeDepth(SqBiTree);     //如果树存在返回树的深度
 TElemType Root(SqBiTree);    //如果树存在，返回树的根
-TElemType Value(SqBiTree,int e); //如果e是树中的某个结点，返回节点的值
-void Assign(SqBiTree,int e,int value); //如果e是树中的某个结点，将结点e赋值为value
-TElemType Parent(SqBiTree,int e); //如果e是树中的某个非根结点，返回这个非根结点的双亲
-TElemType LeftChild(SqBiTree,int e); //如果e是树中某个非叶子结点，则返回这个结点的左孩子
-TElemType RightChild(SqBiTree,int e); //如果e是树中某个非叶子结点，则返回这个结点的右孩子
+TElemType Value(SqBiTree,struct position); //如果e是树中的某个结点，返回节点的值
+void Assign(SqBiTree,struct position,int value); //如果e是树中的某个结点，将结点e赋值为value
+
+TElemType Parent(SqBiTree T,TElemType e); //如果e是树中的某个非根结点，返回这个非根结点的双亲
+TElemType LeftChild(SqBiTree T,TElemType e); //如果e是树中某个非叶子结点，则返回这个结点的左孩子
+TElemType RightChild(SqBiTree T,TElemType e); //如果e是树中某个非叶子结点，则返回这个结点的右孩子
+TElemType LeftSibling(SqBiTree T,TElemType e); //如果e是树中某个结点，返回e的兄弟若e是T的左孩子或无左兄弟，则返回空
+TElemType RightSibling(SqBiTree T,TElemType e);  //如果e是树中某个结点，返回e的右兄弟，若e是T的右孩子或者无右兄弟，则返回空
 
 
+
+//先序遍历
+void PreTraverse(SqBiTree T,int e);
+void PreOrderTraverse(SqBiTree T);
+
+//中序遍历
+void PreTraverse(SqBiTree T,int e);
+void InOrderTraverse(SqBiTree T);
+
+//后序遍历
+void PostTraverse(SqBiTree T,int e);
+void PostOrderTraverse(SqBiTree T);
+
+//层序遍历
+void LevelOrderTraverse(SqBiTree T);
+
+
+void Move(SqBiTree q,int j,SqBiTree T,int i) // InsertChild用到，如把从q的j结点开始的子树移为从T的i结点开始的子树
 void InsertChild(SqBiTree T,TElemType p,int position);
 void DeleteChile(SqBiTree T,TElemType p,int position);
 void TraverseTree(SqBiTree T); //遍历整棵树
@@ -69,10 +90,13 @@ int main(void)
     
     TElemType e;
     SqBiTree T;
+    struct position p = {1,1};
     CreateTree(T);
     int count = TreeDepth(T);
-    e = Value(T,3);
-    printf("%d",e);
+    TElemType a = 2;
+    TElemType j = RightChild(T,a);
+    printf("%d",j);
+    
     return 0;
 }
 
@@ -188,20 +212,88 @@ TElemType Root(SqBiTree T)
 
 
 
-TElemType Value(SqBiTree T,int e)
+TElemType Value(SqBiTree T,struct position p)
 {
 
-    int i;
-    for(i = MAX_TREE_SIZE - 1;i >= 0;i--)
-        if(T[i] != Nil)
-            break;
-    i++;
+    return T[(int)(pow(2,p.level - 1) + p.order - 2)];
 
-    if(e < 0 || e > i)
+}
+
+void Assign(SqBiTree T,struct position p,int value)
+{
+    int i;
+    i = (int)(pow(2,p.level - 1) + p.order - 2);
+
+    //给叶子结点赋值，但是双亲为空
+    if(value != Nil && T[(i + 1) / 2 - 1] == Nil)
     {
-        printf("不能找到这个结点");
+        printf("此节点没有双亲！");
         exit(1);
     }
-    return T[e];
+
+    //给双亲赋空值，但这个双亲不含左子树或右子树
+    if(value == Nil && (T[2 * i + 1] != Nil || T[2 * i + 2] != Nil))
+    {
+        printf("双亲为空的结点不会存在左子数或者右子数！");
+        exit(1);
+    }
+
+    T[i] = value;
 }
+
+TElemType Parent(SqBiTree T,TElemType e)
+{
+    if(IsTreeEmpty(T))
+    {
+        printf("树为空！");
+        exit(1);
+    }
+    
+    int i;
+    for(i = 1;i < MAX_TREE_SIZE;i++)
+        if(T[i] == e)
+            return T[(i + 1) / 2 - 1];
+    
+    return Nil;
+
+}
+
+
+
+
+
+TElemType LeftChild(SqBiTree T, TElemType e)
+{
+    if(IsTreeEmpty(T))
+    {
+        printf("树为空！");
+        exit(1);
+    }
+    
+    int i;
+    for(i = 1;i < MAX_TREE_SIZE;i++)
+        if(T[i] == e)
+            return T[2 * i + 1];
+    
+    return Nil;
+}
+
+
+TElemType RightChild(SqBiTree T,TElemType e)
+{
+    if(IsTreeEmpty(T))
+    {
+        printf("树为空！");
+        exit(1);
+    }
+
+    int i;
+    for(i = 1;i < MAX_TREE_SIZE;i++)
+        if(T[i] == e)
+            return T[2 * i + 2];
+    
+    return Nil;
+}
+
+
 
