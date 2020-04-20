@@ -63,40 +63,44 @@ TElemType RightSibling(SqBiTree T,TElemType e);  //如果e是树中某个结点�
 
 
 
+
+
+void (*VisitFunc)(TElemType);
+void visit(TElemType e);
 //先序遍历
 void PreTraverse(SqBiTree T,int e);
-void PreOrderTraverse(SqBiTree T);
+void PreOrderTraverse(SqBiTree T,void(*Visit)(TElemType));
+
 
 //中序遍历
-void PreTraverse(SqBiTree T,int e);
-void InOrderTraverse(SqBiTree T);
+void InTraverse(SqBiTree T,int e);
+void InOrderTraverse(SqBiTree T,void(*Visit)(TElemType));
 
 //后序遍历
 void PostTraverse(SqBiTree T,int e);
-void PostOrderTraverse(SqBiTree T);
+void PostOrderTraverse(SqBiTree T,void(*Visit)(TElemType));
 
 //层序遍历
 void LevelOrderTraverse(SqBiTree T);
 
 
-void Move(SqBiTree q,int j,SqBiTree T,int i) // InsertChild用到，如把从q的j结点开始的子树移为从T的i结点开始的子树
-void InsertChild(SqBiTree T,TElemType p,int position);
+void Move(SqBiTree q,int j,SqBiTree T,int i); // InsertChild用到，如把从q的j结点开始的子树移为从T的i结点开始的子树
+void InsertChild(SqBiTree T,TElemType p,int LR,SqBiTree c);
 void DeleteChile(SqBiTree T,TElemType p,int position);
 void TraverseTree(SqBiTree T); //遍历整棵树
-void PrintTree(SqBiTree);
+void PrintTree(SqBiTree); //逐层、按本层序号输出二叉树
 
 int main(void)
 {
     
     TElemType e;
     SqBiTree T;
+    SqBiTree q;
     struct position p = {1,1};
     CreateTree(T);
-    int count = TreeDepth(T);
-    TElemType a = 2;
-    TElemType j = RightChild(T,a);
-    printf("%d",j);
-    
+    CreateTree(q);
+    InsertChild(T,2,1,q);
+    PrintTree(T);
     return 0;
 }
 
@@ -151,8 +155,7 @@ void CreateTree(SqBiTree T)
 }
 
 
-
-void PrintTree(SqBiTree T)
+void LevelOrderTraverse(SqBiTree T)
 {
     int i = 0;
     int length;
@@ -293,6 +296,150 @@ TElemType RightChild(SqBiTree T,TElemType e)
             return T[2 * i + 2];
     
     return Nil;
+}
+
+
+
+void visit(TElemType e)
+{
+    printf("%d",e);
+}
+
+//先序遍历
+void (*VisitFunc)(TElemType);
+void PreTraverse(SqBiTree T,int e)
+{
+    VisitFunc(T[e]);
+    if(T[2 * e + 1] != Nil)
+        PreTraverse(T,2 * e + 1);
+    if(T[2 * e + 2] != Nil)
+        PreTraverse(T,2 * e + 2);
+}
+
+void PreOrderTraverse(SqBiTree T,void(*Visit)(TElemType))
+{
+    VisitFunc = Visit;
+    if(!IsTreeEmpty(T))
+    {
+        PreTraverse(T,0);
+    }
+    else
+        printf("此树为空树!");
+}
+
+
+//中序遍历
+void InTraverse(SqBiTree T,int e)
+{
+ 
+    if(T[2 * e + 1] != Nil)
+        InTraverse(T,2 * e + 1);
+    
+    VisitFunc(T[e]);
+   
+   if(T[2 * e + 2] != Nil)
+        InTraverse(T,2 * e + 2);
+}
+
+void InOrderTraverse(SqBiTree T,void(*Visit)(TElemType))
+{
+    VisitFunc = Visit;
+    if(!IsTreeEmpty(T))
+    {
+        InTraverse(T,0);
+    }
+    else
+        printf("此树为空树！");
+
+}
+
+
+
+//后序遍历
+void PostTraverse(SqBiTree T,int e)
+{
+    if(T[2 * e + 1] != Nil)
+        PostTraverse(T,2 * e + 1);
+    
+    if(T[2 * e + 2] != Nil)
+        PostTraverse(T,2 * e + 2);
+    
+    VisitFunc(T[e]);
+}
+
+void PostOrderTraverse(SqBiTree T,void(*Visit)(TElemType))
+{
+    VisitFunc = Visit;
+    if(!IsTreeEmpty(T))
+    {
+        PostTraverse(T,0);
+    }
+    else
+        printf("此树为空");
+}
+
+
+
+void PrintTree(SqBiTree T)
+{
+    struct position p;
+    //层数
+    int j;
+    int k;
+    TElemType e;
+    
+    int hight = 0;
+    
+    hight = TreeDepth(T);
+    
+    for(j = 1;j <= hight;j ++)
+    {
+
+        printf("第%d层",j);
+        
+        for(k = 1;k <= pow(2,j - 1);k++)
+        {
+            p.level = j;
+            p.order = k;
+            e = Value(T,p);
+            if(e != Nil)
+                printf("%d ",e);
+        }
+        printf("\n");
+    }
+
+}
+
+
+
+void Move(SqBiTree q,int j,SqBiTree T,int i) // InsertChild用到，如把从q的j结点开始的子树移为从T的i结点开始的子树
+{
+    if(q[2 * j + 1] != Nil)
+        Move(q,2 * j + 1,T,2 * i + 1);
+
+    if(q[2 * j + 2] != Nil)
+        Move(q,2 * j + 2,T,2 * i + 2);
+    
+    T[i] = q[j]; //把q的结点移动到T上
+    q[j] = Nil;  //移动完成后将q结点赋空
+}
+
+
+
+void InsertChild(SqBiTree T,TElemType p,int LR,SqBiTree c)
+{
+    int j;
+    int k;
+    int i = 0;
+    int length = (int)(pow(2,TreeDepth(T))) - 1;
+    for(j = 0;j < length;j++)
+        if(T[j] == p)
+            break;
+     
+    k = 2 * j + 1 + LR;
+    if(T[k] != Nil)
+        Move(T,k,T,2 * k + 2);
+    Move(c,i,T,k);
 }
 
 
