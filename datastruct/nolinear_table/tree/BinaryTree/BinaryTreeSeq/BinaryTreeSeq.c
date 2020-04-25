@@ -7,12 +7,10 @@
 
 */
 
-
+#include "queue2.h"
 #include <stdio.h>
-#include <stdlib.h>
 #include <strings.h>
 #include <string.h>
-#include <stdbool.h>
 #include <math.h>
 
 
@@ -86,7 +84,7 @@ void LevelOrderTraverse(SqBiTree T);
 
 void Move(SqBiTree q,int j,SqBiTree T,int i); // InsertChild用到，如把从q的j结点开始的子树移为从T的i结点开始的子树
 void InsertChild(SqBiTree T,TElemType p,int LR,SqBiTree c);
-void DeleteChile(SqBiTree T,TElemType p,int position);
+void DeleteChile(SqBiTree T,int LR,struct position);
 void TraverseTree(SqBiTree T); //遍历整棵树
 void PrintTree(SqBiTree); //逐层、按本层序号输出二叉树
 
@@ -96,11 +94,14 @@ int main(void)
     TElemType e;
     SqBiTree T;
     SqBiTree q;
-    struct position p = {1,1};
+    struct position p = {3,2};
     CreateTree(T);
-    CreateTree(q);
-    InsertChild(T,2,1,q);
-    PrintTree(T);
+    int len = TreeDepth(T);
+    //CreateTree(q);
+    //InsertChild(T,2,1,q);
+    //DeleteChile(T,0,p);
+    //PrintTree(T);
+    printf("%d",len);
     return 0;
 }
 
@@ -186,16 +187,17 @@ bool IsTreeEmpty(SqBiTree T)
 int TreeDepth(SqBiTree T)
 {
     int i;
-    int j = -1;
+    int j = 0;
     
     for(i = MAX_TREE_SIZE - 1;i >= 0; i--)
         if(T[i] != Nil)
             break;
     i++;
     
-    do{
+    
+    while(i >= pow(2,j))
         j++;
-    }while(i >= pow(2,j));
+
     return j;
 }
 
@@ -334,10 +336,8 @@ void InTraverse(SqBiTree T,int e)
  
     if(T[2 * e + 1] != Nil)
         InTraverse(T,2 * e + 1);
-    
     VisitFunc(T[e]);
-   
-   if(T[2 * e + 2] != Nil)
+    if(T[2 * e + 2] != Nil)
         InTraverse(T,2 * e + 2);
 }
 
@@ -379,7 +379,6 @@ void PostOrderTraverse(SqBiTree T,void(*Visit)(TElemType))
 }
 
 
-
 void PrintTree(SqBiTree T)
 {
     struct position p;
@@ -409,7 +408,6 @@ void PrintTree(SqBiTree T)
     }
 
 }
-
 
 
 void Move(SqBiTree q,int j,SqBiTree T,int i) // InsertChild用到，如把从q的j结点开始的子树移为从T的i结点开始的子树
@@ -444,3 +442,33 @@ void InsertChild(SqBiTree T,TElemType p,int LR,SqBiTree c)
 
 
 
+void DeleteChile(SqBiTree T,int LR,struct position p)
+{
+    int i;
+    struct queue2 delqueue;
+    init_queue(&delqueue,MAX_TREE_SIZE);
+    
+
+    i = (int)(pow(2,p.level -1)) + p.order - 2;
+    
+    if(T[i] == Nil)
+    {
+        printf("This point is empty!");
+        exit(1);
+    }
+    
+    i = i * 2 + 1;
+    if(T[i] != Nil)
+        insert_queue(&delqueue,i);
+    
+    while(!is_empty(&delqueue))
+    {
+        if(T[2 * i + 1] != Nil)
+            insert_queue(&delqueue,2 * i + 1);
+        if(T[2 * i + 2] != Nil)
+            insert_queue(&delqueue,2 * i + 2);
+        
+        T[i] = Nil;
+        i = delete_queue(&delqueue);
+    }
+}
