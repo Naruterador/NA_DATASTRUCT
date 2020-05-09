@@ -30,6 +30,7 @@ typedef struct BitNode
     //左孩子和右孩子指针
     struct BitNode * Lchild;
     struct BitNode * Rchild;
+    bool tag; //用于后序线索二叉树遍历的标记
 }BitNode,*BiTree;
 
 
@@ -64,7 +65,10 @@ void PostOrderThreading(BiTree *,BiTree);
 //后续遍历线索二叉树
 void PostOrderTraverse1(BiTree T);
 
-
+//清空二叉树
+void DestroyBiTree(BiTree * T);
+//清空线索二叉树
+void DestroyBiThTree(BiTree * Th);
 
 int main(void)
 {
@@ -74,12 +78,11 @@ int main(void)
     init_BiThrTree(&Th);
     init_BiThrTree(&T);
     CreateBiThreTree(&T); 
-    //InOrderThreading(&Th,T);
+    InOrderThreading(&Th,T);
     //InOrderTraverse1(Th); 
     //PreOrderThreading(&Th,T);
     //PreOrderTraverse1(Th);
-    PostOrderThreading(&Th,T);
-    PostOrderTraverse1(Th);
+    //PostOrderThreading(&Th,T);
 
     return 0;
 
@@ -115,6 +118,7 @@ void CreateBiThreTree(BiTree * T)
         }
     
         (*T)->data = data;
+        (*T)->tag = false;
         CreateBiThreTree(&(*T)->Lchild);
         if((*T)->Lchild)
             (*T)->Ltag = Link;
@@ -303,6 +307,7 @@ void PostOrderThreading(BiTree * PthH,BiTree T)
     }
     else
     {
+        (*PthH)->Rchild = T;
         (*PthH)->Lchild = T;
         pre = (*PthH);
         PostThreading(T);
@@ -340,19 +345,32 @@ void PostThreading(BiTree T)
 }
 
 
-void PostOrderTraverse1(BiTree T)
+void DestroyBiTree(BiTree * T)
 {
-    BiTree temp;
-    temp = T->Lchild;
-    
-    //需要用栈来遍历    
+    if(*T)
+    {
+        if((*T)->Ltag == Link)
+            DestroyBiTree(&(*T)->Lchild);
+        if((*T)->Rtag == Link)
+            DestroyBiTree(&(*T)->Rchild);
         
+        free(*T);
+        *T = NULL;
+    }
+}
+    
+void DestroyBiThTree(BiTree * T)
+{
+    if(*T)
+    {
+        if((*T)->Lchild)
+            DestroyBiTree(&(*T)->Lchild);
 
-
+        free(*T);
+        *T = NULL;
+    }
 
 }
-
-
 
 
 
