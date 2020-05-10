@@ -33,7 +33,8 @@ char LeftChild(BiTree,char);
 char RightSibling(BiTree,char);
 //输出树
 void Print(BiTree);
-
+//插入c为T中p结点的第i棵子树
+void InsertChild(BiTree * T,char p,int i,BiTree c);
 
 
 int main(void)
@@ -41,11 +42,12 @@ int main(void)
     int depth;
     char rs;
     BiTree T;
+    BiTree C;
     InitTree(&T);
     CreateTree(&T);
-    //depth = TreeDepth2(T);
-    //rs = RightSibling(T,'A');
-    //printf("%c",rs);
+    //InitTree(&C);
+    //CreateTree(&C);
+    //InsertChild(&T,'R',3,C);
     Print(T);
     return 0;
 
@@ -269,4 +271,92 @@ void Print(BiTree T)
         printf("\n");
     }
 }
+
+
+void InsertChild(BiTree * T,char p,int i,BiTree c)
+{
+   int j;
+   int k;
+   int f = 1;
+   int n = 0;
+   int l = 0;
+   
+   PtNode temp;
+
+   if(!isTempty(*T))
+   {
+        //找到点p所在的结点
+        for(j = 0;j < (*T)->n;j++)
+        { 
+            if(p == (*T)->nodes[j].data)
+                break;
+        }
+        l = j + 1;  //从j + 1的位置上开始插入,当c是p的第一棵子树，从j + 1开始插入
+        
+        //当c不是p的第一棵子树
+        if(i > 1)
+        {
+            for(k = j + 1;k < (*T)->n;k++)
+            {
+                if(j == (*T)->nodes[k].parent)
+                {
+                    n++;
+                    if(n == i - 1)
+                        break;
+                }
+            }
+            l = k + 1;    //c实际插入的位置为k + 1
+        }
+        //将k + 1后的结点依次移动c.n个位置
+        if(l < (*T)->n)
+        {
+            for(k = (*T)->n - 1;k >= l;k--)
+            {
+                (*T)->nodes[k + c->n] = (*T)->nodes[k];
+                if((*T)->nodes[k].parent >= l)
+                   (*T)->nodes[k + c->n].parent = (*T)->nodes[k + c->n].parent + c->n;
+                
+                for(k = 0;k < c->n ;k++)
+                {
+                    (*T)->nodes[k + l].data = c->nodes[k].data;
+                    (*T)->nodes[k + l].parent = c->nodes[k].parent + 1;
+                }
+
+            }
+        }
+        
+        (*T)->nodes[l].parent = j;
+        (*T)->n = (*T)->n + c->n;
+        
+        //按照层序排列
+        while(f)
+        {
+            f = 0; //循环标记位
+            for(j = l;j < (*T)->n;j++)
+            {
+                if((*T)->nodes[j].parent > (*T)->nodes[j + 1].parent)
+                {
+                    temp = (*T)->nodes[j + 1];
+                    (*T)->nodes[j + 1] = (*T)->nodes[j];
+                    (*T)->nodes[j] = temp;
+                
+                    f = 1;
+                
+                    for(k = j;j < (*T)->n;k++)
+                    {   
+                        if((*T)->nodes[k].parent == j)
+                            (*T)->nodes[k].parent++;
+                        else if((*T)->nodes[k].parent == j + 1)
+                            (*T)->nodes[k].parent--;
+
+                    }
+                }
+            }
+
+        }
+   }
+}
+
+
+
 
