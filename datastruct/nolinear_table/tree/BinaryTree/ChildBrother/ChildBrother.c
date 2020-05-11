@@ -13,6 +13,43 @@ void CreateTree(CSTree *);
 //销毁树T
 void DestroyTree(CSTree *);
 
+//递归先序遍历树
+void PreOrderTraverse(CSTree);
+//后序遍历
+void PostOrderTraverse(CSTree);
+//层序遍历
+void LevelOrderTraverse(CSTree);
+
+
+
+
+
+//判断树是否为
+bool TreeEmpty(CSTree);
+//返回树的深度
+int TreeDepth(CSTree);
+//返回树中某节点的值
+char Value(CSTree);
+//返回树的根节点
+char Root(CSTree);
+//返回二叉链表中结点为s的指针
+CSTree Point(CSTree T,char s);
+//修改树T中cur结点的值为value
+void Assign(CSTree T,char cur,char value);
+//返回树T中cur结点的双亲
+char Parent(CSTree T,char cur);
+//返回树T中cur结点的左孩子
+char LeftChild(CSTree T,char cur);
+//返回树T中cur结点的右兄弟
+char RightSilbing(CSTree T,char cur);
+
+//向树T的p结点的第i个位置插入子树c
+void InserChild(CSTree * T,CSTree p,int i,CSTree c);
+//删除树T中p结点的第i棵子树
+void DeleteChild(CSTree * T,CSTree p,int i);
+
+
+
 
 int main(void)
 {
@@ -20,6 +57,7 @@ int main(void)
     CSTree T;
     Init(&T);
     CreateTree(&T);
+    PreOrderTraverse(T);
     return 0;
 }
 
@@ -98,3 +136,29 @@ void CreateTree(CSTree * T)
     else
         (*T) = NULL;
 }
+
+
+void PreOrderTraverse(CSTree T)
+{
+    if(T)
+    {
+        printf("%c",T->data);
+        PreOrderTraverse(T->firstChild);
+        PreOrderTraverse(T->nextSibling);
+    }
+}
+
+
+
+void DestroyTree(CSTree * T)
+{
+    if((*T)->firstChild)
+        DestroyTree(&(*T)->firstChild);
+    
+    if((*T)->nextSibling)
+        DestroyTree(&(*T)->nextSibling);
+
+    free(*T);
+    *T = NULL;
+}
+
