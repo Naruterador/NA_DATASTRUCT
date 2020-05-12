@@ -26,10 +26,8 @@ void LevelOrderTraverse(CSTree);
 
 //判断树是否为
 bool TreeEmpty(CSTree);
-//返回树的深度算法1
-int TreeDepth1(CSTree);
-//返回树的深度算法2
-int TreeDepth2(CSTree);
+//返回树的深度算法
+int TreeDepth(CSTree);
 //返回树中某节点的值
 char Value(CSTree);
 //返回树的根节点
@@ -180,28 +178,7 @@ bool TreeEmpty(CSTree T)
 }
 
 
-int TreeDepth1(CSTree T)
-{
-    int i = 0;
-    int j = 0;
-    
-    if(T->firstChild)
-        i = TreeDepth1(T->firstChild);
-    else
-        i = 0;
-
-    if(T->nextSibling)
-        j = TreeDepth1(T->nextSibling);
-    else
-        j = 0;
-
-    return i > j?i + 1:j + 1;
-
-}
-
-
-
-int TreeDepth2(CSTree T)
+int TreeDepth(CSTree T)
 {
     CSTree p;
     int depth;
@@ -215,7 +192,7 @@ int TreeDepth2(CSTree T)
 
     for(p = T->firstChild;p;p = p->nextSibling)
     {
-        depth = TreeDepth2(p);
+        depth = TreeDepth(p);
         if(max < depth)
             max = depth;
     }
@@ -325,13 +302,14 @@ char Parent(CSTree T,char cur)
 }
 
 
+
 char LeftChild(CSTree T,char cur)
 {
     CSTree temp;
     temp = Point(T,cur);
     
     if(temp&&temp->firstChild)
-        return temp->data;
+        return temp->firstChild->data;
     return ' ';
 }
 
@@ -341,7 +319,7 @@ char RightSilbing(CSTree T,char cur)
     temp = Point(T,cur);
 
     if(temp&&temp->nextSibling)
-        return temp->data;
+        return temp->nextSibling->data;
     return ' ';
 }
 
@@ -403,7 +381,6 @@ void LevelOrderTraverse(CSTree T)
 //p是T中的某个结点
 void InserChild(CSTree * T,CSTree p,int i,CSTree c)
 {
-    CSTree temp;
     int j;
     
     if(T)
@@ -453,7 +430,7 @@ void DeleteChild(CSTree * T,CSTree p,int i)
         }
         else
         {
-           p = temp->firstChild;
+           p = p->firstChild;
            j = 2;
            while(p&&j < i)
            {
