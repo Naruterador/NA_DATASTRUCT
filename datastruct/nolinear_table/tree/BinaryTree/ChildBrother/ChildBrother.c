@@ -26,8 +26,10 @@ void LevelOrderTraverse(CSTree);
 
 //判断树是否为
 bool TreeEmpty(CSTree);
-//返回树的深度
-int TreeDepth(CSTree);
+//返回树的深度算法1
+int TreeDepth1(CSTree);
+//返回树的深度算法2
+int TreeDepth2(CSTree);
 //返回树中某节点的值
 char Value(CSTree);
 //返回树的根节点
@@ -53,11 +55,17 @@ void DeleteChild(CSTree * T,CSTree p,int i);
 
 int main(void)
 {
-
+    CSTree inpoint;
     CSTree T;
+    CSTree P;
     Init(&T);
+    Init(&P);
     CreateTree(&T);
-    PreOrderTraverse(T);
+    CreateTree(&P);
+    inpoint = Point(T,'B');
+    InserChild(&T,inpoint,1,P);
+    DeleteChild(&T,inpoint,1);
+    LevelOrderTraverse(T); 
     return 0;
 }
 
@@ -162,3 +170,304 @@ void DestroyTree(CSTree * T)
     *T = NULL;
 }
 
+
+
+bool TreeEmpty(CSTree T)
+{
+    if(NULL == T)
+        return true;
+    return false;
+}
+
+
+int TreeDepth1(CSTree T)
+{
+    int i = 0;
+    int j = 0;
+    
+    if(T->firstChild)
+        i = TreeDepth1(T->firstChild);
+    else
+        i = 0;
+
+    if(T->nextSibling)
+        j = TreeDepth1(T->nextSibling);
+    else
+        j = 0;
+
+    return i > j?i + 1:j + 1;
+
+}
+
+
+
+int TreeDepth2(CSTree T)
+{
+    CSTree p;
+    int depth;
+    int max = 0;
+    
+    if(NULL == T)
+        return 0;
+
+    if(NULL == T->firstChild)
+        return 1;
+
+    for(p = T->firstChild;p;p = p->nextSibling)
+    {
+        depth = TreeDepth2(p);
+        if(max < depth)
+            max = depth;
+    }
+        return max + 1;
+}
+
+
+char Value(CSTree p)
+{
+
+    return p->data;
+
+}
+
+char Root(CSTree T)
+{
+
+    if(T)
+        return T->data;
+    return ' ';
+}
+
+CSTree Point(CSTree T,char s)
+{
+    CSTree temp;
+    struct queuelist queue;
+    
+    if(T)
+    {
+        init_queue(&queue,1);
+        insert_queue(&queue,T);
+        
+        while(!is_empty(&queue))
+        {
+            temp = delete_queue(&queue);
+            if(temp->data == s)
+                return temp;
+            else
+            {
+                if(temp->firstChild)
+                    insert_queue(&queue,temp->firstChild);
+                if(temp->nextSibling)
+                    insert_queue(&queue,temp->nextSibling);
+            }
+
+        }
+    }
+    return NULL;
+}
+
+void Assign(CSTree T,char cur,char value)
+{
+    CSTree temp;
+    
+    if(T)
+    {
+        temp = Point(T,cur);
+        if(temp)
+            temp->data = value;
+    }
+
+}
+
+char Parent(CSTree T,char cur)
+{
+    CSTree temp1;
+    CSTree temp2;
+    struct queuelist queue;
+    
+
+    if(T)
+    {
+        //如果是根结点，则直接返回cur
+        if (Root(T) == cur)
+            return cur;
+        
+        init_queue(&queue,1);
+        insert_queue(&queue,T);
+        
+        while(!is_empty(&queue))
+        {
+           temp1 = delete_queue(&queue);
+           
+           if(temp1->firstChild)
+           {
+                if(temp1->firstChild->data == cur)
+                    return temp1->data;
+
+                temp2 = temp1;
+                temp1 = temp1->firstChild;
+                insert_queue(&queue,temp1);
+                while(temp1->nextSibling)
+                {
+                    
+                    temp1 = temp1->nextSibling;
+                    if(temp1->data == cur)
+                        return temp2->data;
+                    insert_queue(&queue,temp1);
+
+
+                }
+
+           }
+        }
+    }    
+    return ' ';
+}
+
+
+char LeftChild(CSTree T,char cur)
+{
+    CSTree temp;
+    temp = Point(T,cur);
+    
+    if(temp&&temp->firstChild)
+        return temp->data;
+    return ' ';
+}
+
+char RightSilbing(CSTree T,char cur)
+{
+    CSTree temp;
+    temp = Point(T,cur);
+
+    if(temp&&temp->nextSibling)
+        return temp->data;
+    return ' ';
+}
+
+
+
+void PostOrderTraverse(CSTree T)
+{
+    CSTree temp;
+    
+    if(T)
+    {
+        if(T->firstChild)
+        {
+            PostOrderTraverse(T->firstChild);
+            temp = T->firstChild->nextSibling;
+            while(temp)
+            {
+                PostOrderTraverse(temp);
+                temp = temp->nextSibling;
+            }
+
+        }
+        printf("%c",T->data);
+    }
+    
+}
+
+void LevelOrderTraverse(CSTree T)
+{
+    CSTree temp;
+    struct queuelist queue;
+    init_queue(&queue,1); 
+    if(T)
+    {
+        printf("%c",T->data);
+        insert_queue(&queue,T);
+        
+        while(!is_empty(&queue))
+        {
+            temp = delete_queue(&queue);    
+            if(temp->firstChild)
+            {
+                
+                temp = temp->firstChild;
+                printf("%c",temp->data);
+                insert_queue(&queue,temp);
+                while(temp->nextSibling)
+                {
+                    temp = temp->nextSibling;
+                    printf("%c",temp->data);
+                    insert_queue(&queue,temp);
+                }
+            }
+        }
+        
+    }
+}
+
+//p是T中的某个结点
+void InserChild(CSTree * T,CSTree p,int i,CSTree c)
+{
+    CSTree temp;
+    int j;
+    
+    if(T)
+    {
+        if(i == 1)  //表示插入为长子
+        {
+            c->nextSibling = p->firstChild;
+            p->firstChild = c;
+
+        }
+        else
+        {
+            p = p->firstChild;
+            j = 2;
+            while(p&&j < i)
+            {
+                p = p->nextSibling;
+                j++;
+            }
+            if(j == i)
+            {
+                c->nextSibling = p->nextSibling;
+                p->nextSibling = c;
+
+            }else{
+                printf("不能找到插入点");
+                exit(1);
+            }
+        }
+    }else{
+        printf("树为空");
+    }
+}
+
+void DeleteChild(CSTree * T,CSTree p,int i)
+{
+    CSTree temp;
+    int j;
+    if(T)
+    {
+        if(i == 1) //删长子
+        {
+            temp = p->firstChild;
+            p->firstChild = temp->nextSibling;
+            temp->nextSibling = NULL;
+            DestroyTree(&temp);
+        }
+        else
+        {
+           p = temp->firstChild;
+           j = 2;
+           while(p&&j < i)
+           {
+             p = p->nextSibling;
+             j++;
+           }
+           if(j == i)
+           {
+               temp = p->nextSibling;
+               p->nextSibling = temp->nextSibling;
+               temp->nextSibling = NULL;
+               DestroyTree(&temp);
+           }
+        }
+
+    }
+}
