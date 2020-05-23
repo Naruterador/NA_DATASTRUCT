@@ -49,8 +49,10 @@ void DeleteArc(struct MGraph * G,char v,char w);
 //深度优先递归的遍历G
 void DFS(struct MGraph * G,int v);
 
-//深度优先非递归遍历图G
-void DFSTraverse(struct MGraph * G);
+//深度优先递归遍历图G,只遍历一条路径
+void DFSTraverse1(struct MGraph * G);
+//深度优先递归遍历图G,以不同的起点遍历图G
+void DFSTraverse2(struct MGraph * G);
 
 
 //广度优先遍历图G
@@ -65,9 +67,9 @@ int main(void)
     struct MGraph G;
         
     CreateUDG(&G);
-    DFSTraverse(&G);
+    //DFSTraverse(&G);
     //BFSTraverse(&G);
-
+    DFSTraverse1(&G);
 
 
     return 0;
@@ -202,11 +204,9 @@ void DFS(struct MGraph * G,int v)
 
 }
 
-
-
-void DFSTraverse(struct MGraph * G)
+void DFSTraverse1(struct MGraph * G)
 {
-    
+    int t = 0; 
     int i = 0;
     //初始化数组访问标志数组
     for(i = 0;i < G->vexnum;i++)
@@ -216,6 +216,24 @@ void DFSTraverse(struct MGraph * G)
     {
         if(visited[i] == 0)
             DFS(G,i);
+    }
+}
+
+void DFSTraverse2(struct MGraph * G)
+{
+    int t = 0; 
+    int i = 0;
+    //初始化数组访问标志数组
+    for(i = 0;i < G->vexnum;i++)
+        visited[i] = 0;
+    
+    for(i = 0;i < G->vexnum;i++)
+    {
+        //每次以不同的起点深度优先遍历图G
+        DFS(G,i);
+        for(t = 0;t < G->vexnum;t++)
+            visited[t] = 0;
+        printf("\n");
     }
 }
 
