@@ -1,7 +1,6 @@
 //邻接矩阵实现图的操作
 
 #include "queue.h"
-
 //找u在G中的下标
 int LocateVex(struct MGraph * G,char u);
 
@@ -38,7 +37,7 @@ int NextAdjVex(struct MGraph * G,char v,char w);
 void InsertVex(struct MGraph * G,char v);
 
 //在图G中删除顶点v以及相关的弧
-void Delete(struct MGraph * G,char v);
+void DeleteVex(struct MGraph * G,char v);
 
 //在G中为<v,w>两个顶点增加弧
 void InserArc(struct MGraph * G,char v,char w);
@@ -277,3 +276,125 @@ void BFSTraverse(struct MGraph * G)
 
 }
 
+void InsertVex(struct MGraph * G,char v)
+{
+    int i;
+    int j = 0;
+    strcpy(&G->vex[G->vexnum],&v);
+    
+    for(i = 0;i <= G->vexnum;i++)
+    {
+        G->arcs[G->vexnum][i].adj = j;
+        G->arcs[i][G->vexnum].adj = j;
+    }
+    
+    G->vexnum++; 
+}
+
+
+
+void DeleteVex(struct MGraph * G,char v)
+{
+    int k;
+    int j;
+    int i;
+    int m;
+    
+    m = 0; //顶点之间没有边
+    k = LocateVex(G,v);
+    if(k < 0)
+    {
+        printf("ERROR:顶点不存在");
+        exit(1);
+    }
+    
+    //删除所要删除顶点的边,(删除无向图的出度边)
+    for(i = 0;i < G->vexnum;i++)
+    {
+        if(G->arcs[i][k].adj != m)
+            G->arcnum--;
+    }
+
+
+    //删除有向图的入度边
+    if(G->kind < 2)
+    {
+        for(i = 0;i < G->vexnum;i++)
+            if(G->arcs[k][i].adj != m)
+                G->arcnum--;
+
+    }
+
+    
+    //在顶点表中将顶点删除
+    for(j = k + 1;k < G->vexnum;j++)
+        G->vex[j-1] = G->vex[j];
+
+    //删除顶点右边的矩阵元素
+    for(i = 0;i < G->vexnum;i++)
+        for(j = k + 1; j < G->vexnum;j++)
+            G->arcs[i][j - 1] = G->arcs[i][j];
+    
+    //删除顶点下边的矩阵元素
+    for(i = 0;i < G->vexnum;i++)
+        for(j = k + 1;j < G->vexnum;j++)
+            G->arcs[j - 1][i] = G->arcs[j][i];
+    
+    G->vexnum--;
+}
+
+
+void InserArc(struct MGraph * G,char v,char w)
+{
+    int i;
+    int j;
+    int v1;
+    int v2;
+    
+    //获取2个顶点的位置
+    v1 = LocateVex(G,v);
+    v2 = LocateVex(G,w);
+    
+    if(G->kind % 2) //如果是网
+    {
+        printf("请输入权值:");
+        scanf("%d",&G->arcs[v1][v2].adj);
+    }
+    else
+    {
+        G->arcs[v1][v2].adj = 1;    //如果是图就赋1
+    }
+
+    if(G->kind > 1) //如果是无向图，在对应位置添加边
+        G->arcs[v2][v1] = G->arcs[v1][v2];
+
+    G->arcnum++;
+}
+
+
+void DeleteArc(struct MGraph * G,char v,char w)
+{
+    int i;
+    int j = 0;
+    int v1;
+    int v2;
+    
+    v1 = LocateVex(G,v);
+    v2 = LocateVex(G,w);
+
+    if(v1 < 0 || v2 < 0)
+    {
+        printf("找不到这个顶点");
+        exit(1);
+    }
+    
+    G->arcs[v1][v2].adj = j;
+
+    if(G->kind >= 2) //无向图
+        G->arcs[v2][v1].adj = j;
+
+
+
+
+
+}

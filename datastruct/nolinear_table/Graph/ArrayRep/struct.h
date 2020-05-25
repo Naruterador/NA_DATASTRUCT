@@ -8,7 +8,7 @@
 #define MAX_VERTEX_NUM 26 //图的最大顶点数量
 #define INFINITY INT_MAX //整型的最大值
 
-enum Graphkind{DG,DN,UDG,UDN};   //图的类型(有向图，无向图，有向网，无向网)
+enum Graphkind{DG,DN,UDG,UDN};   //图的类型(有向图，有向网，无向图，无向网)
 typedef int VRType;
 
 typedef struct
