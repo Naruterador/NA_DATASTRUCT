@@ -17,7 +17,7 @@ struct ArcNode
 {
     struct ElemType data;
     struct ArcNode * nextarc;
-}*pNode;
+};
 
 
 typedef struct VNode
