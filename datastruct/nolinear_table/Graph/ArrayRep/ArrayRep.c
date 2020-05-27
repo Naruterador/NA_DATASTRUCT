@@ -62,15 +62,14 @@ void Display(struct MGraph * G);
 
 int main(void)
 {
-
+    int i = 0;
     struct MGraph G;
         
     CreateUDG(&G);
     //DFSTraverse(&G);
     //BFSTraverse(&G);
-    DFSTraverse1(&G);
-
-
+    DeleteArc(&G,'A','C');
+    BFSTraverse(&G);
     return 0;
 }
 
@@ -137,6 +136,14 @@ void CreateUDG(struct MGraph * G)
     }
     G->kind = UDG;
 }
+
+
+void DestroyGraph(struct MGraph * G)
+{
+    G->arcnum = 0;
+    G->vexnum = 0;
+}
+
 
 
 char GetVex(struct MGraph * G,int v)
@@ -393,8 +400,6 @@ void DeleteArc(struct MGraph * G,char v,char w)
     if(G->kind >= 2) //无向图
         G->arcs[v2][v1].adj = j;
 
-
-
-
-
+    G->arcnum--;
 }
+
