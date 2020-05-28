@@ -62,14 +62,16 @@ void Display(struct MGraph * G);
 
 int main(void)
 {
-    int i = 0;
+    int k;
     struct MGraph G;
         
     CreateUDG(&G);
+    k = NextAdjVex(&G,'A','B');
+    printf("%d",k);
     //DFSTraverse(&G);
     //BFSTraverse(&G);
-    DeleteArc(&G,'A','C');
-    BFSTraverse(&G);
+    //DeleteArc(&G,'A','C');
+    //BFSTraverse(&G);
     return 0;
 }
 
@@ -114,7 +116,7 @@ void CreateUDG(struct MGraph * G)
     for(i = 0;i < G->vexnum;i++)
         for(j = 0;j < G->vexnum;j++)
         {
-           G->arcs[i][j].adj = 0;
+            G->arcs[i][j].adj = 0;
         }
 
     //输入无向图中边的关系

@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
-
+#include <limits.h>
 
 //该函数返回顶点下标
 int LocateVex(struct ALGraph * G,VRType v);
@@ -25,7 +25,7 @@ void PutVex(struct ALGraph * G,VRType v,VRType value);
 int FirstAdjVex(struct ALGraph * G,VRType v);
 
 //DelectArc()、DeleteVex()、NextAdjVex()要调用的函数
-void equalvex(struct ElemType v1,struct ElemType v2);
+bool equalvex(struct ElemType v1,struct ElemType v2);
 
 //图G存在,v是G中某个顶点，w是v的邻接顶点，返回v的(相对与w的)下一个邻接顶点的序号。若w是v的最后一个邻接点，则返回-1
 int NextAdjVex(struct ALGraph * G,VRType v,VRType w);
@@ -38,15 +38,19 @@ struct ElemType delete_ce(struct ArcNode ** Arc,int position);
 bool is_empty(struct ArcNode * Arc);
 //销毁链表
 void DestroyList(struct ArcNode ** Arc);
+//线性表L存在，compare()是数据元素判定函数(满足为1，否则为0)，返回L中满足关系compare()的数据元素位序，若数据不存在则返回值为0
+int LocateElem(struct ArcNode * Arc,struct ElemType e,bool(*compare)(struct ElemType,struct ElemType));
+//查找表中满足条件的结点，如果找到则返回指针
+struct ArcNode * Point(struct ArcNode * Arc,struct ElemType,bool(*compare)(struct ElemType,struct ElemType));
 
 
 
 int main(void)
 {
     int temp;
-    struct ALGraph G;
-    CreateGraph(&G);
-    temp = FirstAdjVex(&G,'B');
+    //struct ALGraph G;
+    //CreateGraph(&G);
+    //temp = NextAdjVex(&G,'A','C');
     printf("%d",temp);
     //DestroyGraph(&G);
 
@@ -100,6 +104,7 @@ bool insert_ce(struct ArcNode ** Arc,struct ElemType val,int position)
         *Arc = pNew;
         return true;
     }
+    return false;
 }
 
 
@@ -228,4 +233,72 @@ int FirstAdjVex(struct ALGraph * G,VRType v)
 
 }
 
+bool equalvex(struct ElemType v1,struct ElemType v2)
+{
+    if(v1.adjvex == v2.adjvex)
+        return true;
+    return false;
+}
+
+
+int LocateElem(struct ArcNode * Arc,struct ElemType e,bool(*compare)(struct ElemType,struct ElemType))
+{
+     
+    int i = 0;
+    
+    struct ArcNode * p = Arc;
+    
+    while(p)
+    {
+        i++;
+        if(compare(p->data,e))
+            return i;
+        p = p->nextarc;
+    }
+    return 0;
+}
+
+struct ArcNode * Point(struct ArcNode * Arc,struct ElemType e,bool(*compare)(struct ElemType,struct ElemType))
+{
+    int i;
+    int j;
+    i = LocateElem(Arc,e,equalvex);
+
+    struct ArcNode * p;
+    
+    if(i)
+    {
+        if(i == 1)
+        {
+            p = NULL;
+            return Arc->nextarc;
+        }
+        
+        p = Arc;
+        
+        for(j = 2;j < i;j++)
+            p = p->nextarc;
+        
+        return p;
+    }
+    return NULL;
+}
+
+
+int NextAdjVex(struct ALGraph * G,VRType v,VRType w)
+{
+   struct ArcNode * p;
+   struct ElemType e;
+   
+   int v1;
+   v1 = LocateVex(G,v);
+   e.adjvex = LocateVex(G,w);
+
+   p = Point(G->vertices[v1].firstarc,e,equalvex);
+   
+   if(!p)
+        return -1;
+   
+   return p->data.adjvex;
+}
 
