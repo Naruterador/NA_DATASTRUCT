@@ -44,9 +44,11 @@ int visited[MVNum];
 //深度优先遍历
 void DFS(struct ALGraph * G,int v);
 void DFSTraverse(struct ALGraph * G);
+void DFS1(struct ALGraph * G,int v);
+void DFSTraverse1(struct ALGraph * G);
 //广度优先遍历
 void BFSTraverse(struct ALGraph * G);
-
+void BFSTraverse1(struct ALGraph * G);
 
 
 int main(void)
@@ -57,8 +59,8 @@ int main(void)
     //temp = NextAdjVex(&G,'D','B');
     //printf("%d",temp);
     //DestroyGraph(&G);
-    //DFSTraverse(&G);
-    BFSTraverse(&G);
+    DFSTraverse1(&G);
+    //BFSTraverse(&G);
 
     return 0;
 }
@@ -322,7 +324,7 @@ void DFS(struct ALGraph * G,int v)
 
 void DFSTraverse(struct ALGraph * G)
 {
-    int i = 0;
+   int i = 0;
     for(i = 0;i < G->vexnum;i++)
         visited[i] = 0;
     
@@ -331,6 +333,30 @@ void DFSTraverse(struct ALGraph * G)
             DFS(G,i);
     
 }
+
+
+void DFS1(struct ALGraph * G,int v)
+{
+    struct ArcNode * p;
+    visited[v] = 1;
+    printf("%c",G->vertices[v].data);
+    for(p = G->vertices[v].firstarc;p;p = p->nextarc)
+        if(0 == visited[p->data.adjvex])
+            DFS(G,p->data.adjvex);
+}
+
+void DFSTraverse1(struct ALGraph * G)
+{
+    int i;
+    for(i = 0;i < G->vexnum;i++)
+        visited[i] = 0;
+    
+    for(i = 0;i < G->vexnum;i++)
+        if(0 == visited[i])
+            DFS1(G,i);
+}
+
+
 
 
 void BFSTraverse(struct ALGraph * G)
@@ -345,7 +371,7 @@ void BFSTraverse(struct ALGraph * G)
     for(v = 0;v < G->vexnum;v++)
         visited[w] = 0;
 
-    for(v = 0;v < G->vexnum;v ++)
+    for(v = 0;v < G->vexnum;v++)
         if(0 == visited[v])
         {
             visited[v] = 1;
