@@ -1,10 +1,6 @@
 //图的邻接表实现
 
-#include "struct.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdbool.h>
-#include <limits.h>
+#include "queue.h"
 
 //该函数返回顶点下标
 int LocateVex(struct ALGraph * G,VRType v);
@@ -43,16 +39,26 @@ int LocateElem(struct ArcNode * Arc,struct ElemType e,bool(*compare)(struct Elem
 //查找表中满足条件的结点，如果找到则返回指针
 struct ArcNode * Point(struct ArcNode * Arc,struct ElemType,bool(*compare)(struct ElemType,struct ElemType));
 
+//图遍历的标记数组
+int visited[MVNum];
+//深度优先遍历
+void DFS(struct ALGraph * G,int v);
+void DFSTraverse(struct ALGraph * G);
+//广度优先遍历
+void BFSTraverse(struct ALGraph * G);
+
 
 
 int main(void)
 {
     int temp;
-    //struct ALGraph G;
-    //CreateGraph(&G);
-    //temp = NextAdjVex(&G,'A','C');
-    printf("%d",temp);
+    struct ALGraph G;
+    CreateGraph(&G);
+    //temp = NextAdjVex(&G,'D','B');
+    //printf("%d",temp);
     //DestroyGraph(&G);
+    //DFSTraverse(&G);
+    BFSTraverse(&G);
 
     return 0;
 }
@@ -271,15 +277,15 @@ struct ArcNode * Point(struct ArcNode * Arc,struct ElemType e,bool(*compare)(str
         if(i == 1)
         {
             p = NULL;
-            return Arc->nextarc;
+            return Arc;
         }
         
         p = Arc;
         
         for(j = 2;j < i;j++)
             p = p->nextarc;
-        
-        return p;
+            
+            return p->nextarc;
     }
     return NULL;
 }
@@ -296,9 +302,66 @@ int NextAdjVex(struct ALGraph * G,VRType v,VRType w)
 
    p = Point(G->vertices[v1].firstarc,e,equalvex);
    
-   if(!p)
+   if(NULL == p || NULL == p->nextarc)
         return -1;
    
-   return p->data.adjvex;
+   return p->nextarc->data.adjvex;
 }
 
+void DFS(struct ALGraph * G,int v)
+{
+    int w;
+    visited[v] = 1;
+    printf("%c",G->vertices[v].data);
+    
+    for(w = FirstAdjVex(G,G->vertices[v].data);w >= 0;w = NextAdjVex(G,G->vertices[v].data,G->vertices[w].data))
+        if(0 == visited[w])
+            DFS(G,w);
+            
+}
+
+void DFSTraverse(struct ALGraph * G)
+{
+    int i = 0;
+    for(i = 0;i < G->vexnum;i++)
+        visited[i] = 0;
+    
+    for(i = 0;i < G->vexnum;i++)
+        if(0 == visited[i])
+            DFS(G,i);
+    
+}
+
+
+void BFSTraverse(struct ALGraph * G)
+{
+    int v;
+    int u;
+    int w;
+    struct queuelist queue;
+    
+    init_queue(&queue,1);
+
+    for(v = 0;v < G->vexnum;v++)
+        visited[w] = 0;
+
+    for(v = 0;v < G->vexnum;v ++)
+        if(0 == visited[v])
+        {
+            visited[v] = 1;
+            printf("%c",G->vertices[v].data);
+            insert_queue(&queue,v);
+            while(!is_queue_empty(&queue))
+            {
+                u = delete_queue(&queue);
+                for(w = FirstAdjVex(G,G->vertices[u].data);w >=0;w = NextAdjVex(G,G->vertices[u].data,G->vertices[w].data))
+                    if(0 == visited[w])
+                    {
+                        visited[w] = 1;
+                        printf("%c",G->vertices[w].data);
+                        insert_queue(&queue,w);
+                    }
+            }
+
+        }   
+}
