@@ -357,8 +357,6 @@ void DFSTraverse1(struct ALGraph * G)
 }
 
 
-
-
 void BFSTraverse(struct ALGraph * G)
 {
     int v;
