@@ -38,6 +38,23 @@ void DestroyList(struct ArcNode ** Arc);
 int LocateElem(struct ArcNode * Arc,struct ElemType e,bool(*compare)(struct ElemType,struct ElemType));
 //查找表中满足条件的结点，如果找到则返回指针
 struct ArcNode * Point(struct ArcNode * Arc,struct ElemType,bool(*compare)(struct ElemType,struct ElemType));
+//返回该顶点的前驱结点
+struct ArcNode * Perpoint(struct ArcNode * Arc,struct ElemType e,bool(*compare)(struct ElemType,struct ElemType));
+//删除顶点元素
+struct ArcNode * DeleteElem(struct ArcNode ** Arc,struct ElemType e,bool(*compare)(struct ElemType,struct ElemType));
+
+
+
+
+//返回链表的长度
+int ListLength(struct ArcNode * Arc);
+//删除链表的第一个结点
+struct ElemType ListDelete(struct ArcNode ** Arc);
+
+
+
+
+
 
 //图遍历的标记数组
 int visited[MVNum];
@@ -51,17 +68,31 @@ void BFSTraverse(struct ALGraph * G);
 void BFSTraverse1(struct ALGraph * G);
 
 
+//插入一个新的顶点
+void InsertVex(struct ALGraph * G,VRType V);
+//删除一个顶点
+void DeleteVex(struct ALGraph * G,VRType V);
+//在图G中增加弧<v,w>,若G是无向图则还需要添加对称弧<w,v>
+void InsertArc(struct ALGraph * G,VRType v,VRType w);
+//在图G中删除弧度<v,w>,若G是无向的,则还需要删除对称弧<w,v>
+void DeleteArc(struct ALGraph * G,VRType v,VRType w);
+
+
+
+
 int main(void)
 {
     int temp;
     struct ALGraph G;
+    struct ElemType e;
     CreateGraph(&G);
+    InsertArc(&G,'A','D');
+    DeleteArc(&G,'C','D');
     //temp = NextAdjVex(&G,'D','B');
-    //printf("%d",temp);
+    //printf("%d",e.temp);
     //DestroyGraph(&G);
-    DFSTraverse1(&G);
+    //DFSTraverse1(&G);
     //BFSTraverse(&G);
-
     return 0;
 }
 
@@ -292,6 +323,33 @@ struct ArcNode * Point(struct ArcNode * Arc,struct ElemType e,bool(*compare)(str
     return NULL;
 }
 
+struct ArcNode * Perpoint(struct ArcNode * Arc,struct ElemType e,bool(*compare)(struct ElemType,struct ElemType))
+{
+    int i;
+    int j;
+    i = LocateElem(Arc,e,equalvex);
+
+    struct ArcNode * p;
+    
+    if(i)
+    {
+        if(i == 1)
+        {
+            p = NULL;
+            return Arc;
+        }
+        
+        p = Arc;
+        
+        for(j = 2;j < i;j++)
+            p = p->nextarc;
+            
+            return p;
+    }
+    return NULL;
+}
+
+
 
 int NextAdjVex(struct ALGraph * G,VRType v,VRType w)
 {
@@ -388,4 +446,208 @@ void BFSTraverse(struct ALGraph * G)
             }
 
         }   
+}
+
+void InsertVex(struct ALGraph * G,VRType V)
+{
+    strcpy(&G->vertices[G->vexnum].data,&V);
+    G->vertices[G->vexnum].firstarc = NULL;
+    G->vexnum++;
+}
+
+
+int ListLength(struct ArcNode * Arc)
+{
+    struct ArcNode * p = Arc;
+    int i = 0;
+    while(p != NULL)
+    {
+        i++;
+        p = p->nextarc;
+    }
+    return i;
+}
+
+
+struct ElemType ListDelete(struct ArcNode ** Arc)
+{
+    struct ArcNode * p;
+    struct ArcNode * q;
+    q = *Arc;
+    p = q->nextarc;
+    *Arc = p;
+    if(p)
+    {
+        free(p);
+        p = NULL;
+    }
+    return q->data;
+}
+
+
+
+
+
+void DeleteVex(struct ALGraph * G,VRType V)
+{
+    int i;
+    int j;
+    int k;
+    
+    struct ElemType e;
+    struct ArcNode * p;
+    struct ArcNode * p1;
+    struct ArcNode * q;
+
+    //找到顶点j的序号
+    j = LocateVex(G,V);
+    if(j < 0)
+    {
+        printf("找不到这个顶点!");
+        exit(1);
+    }
+    //返回j顶点的弧数量
+    i = ListLength(G->vertices[j].firstarc);
+    G->arcnum = G->arcnum - i; //删除顶点对应的边的数量
+    
+    //删除需要删除顶点的弧
+    while(G->vertices[j].firstarc)
+    {
+        e = ListDelete(&G->vertices[j].firstarc);
+    }
+    
+    G->vexnum--; //减去一个顶点个数
+    
+    //其余顶点前移
+    for(i = j;i < G->vexnum; i++)
+        G->vertices[i] = G->vertices[i + 1];
+    
+    //删除已删除的顶点和其他顶点的弧
+    for(i = 0;i < G->vexnum; i++)
+    {
+        e.adjvex = j;
+        p = Point(G->vertices[i].firstarc,e,equalvex);
+
+        if(p)
+        {
+            if(p == G->vertices[i].firstarc)
+            {
+                G->vertices[i].firstarc = p->nextarc;
+            }
+            else
+            {
+                e.adjvex = p->data.adjvex;
+                p1 = Perpoint(G->vertices[i].firstarc,e,equalvex);
+                p1->nextarc = p->nextarc;
+            }
+
+            if(G->kind < 2) //有向图
+                G->arcnum--;
+        }
+        free(p);
+        
+        //修改adjvex域>j的顶点，其序号-1
+        for(k = j + 1;k <= G->vexnum;k++)
+        {
+            e.adjvex = k;
+            p = Point(G->vertices[i].firstarc,e,equalvex);
+            if(p)
+                p->data.adjvex--;
+        } 
+    }
+}
+
+
+void InsertArc(struct ALGraph * G,VRType v,VRType w)
+{
+     struct ElemType e;
+     int i;
+     int j;
+     
+     i = LocateVex(G,v);
+     j = LocateVex(G,w);
+     
+     if(i < 0 || j < 0)
+     {
+        printf("ERROR:不能找到这2个顶点");
+        exit(1);
+     }
+     e.adjvex = j;
+     insert_ce(&G->vertices[i].firstarc,e,1);
+     if(G->kind >= 2)
+    {
+            e.adjvex = i;
+            insert_ce(&G->vertices[j].firstarc,e,1);
+    }
+    G->arcnum++;
+}
+
+
+
+struct ArcNode * DeleteElem(struct ArcNode ** Arc,struct ElemType e,bool(*compare)(struct ElemType,struct ElemType))
+{
+        
+    int i;
+    int j;
+    i = LocateElem(*Arc,e,equalvex);
+
+    struct ArcNode * p;
+    struct ArcNode * q;
+    struct ArcNode * p1;
+    p = *Arc;
+    if(i)
+    {
+        if(i == 1)
+        {
+            q = p;
+            *Arc = p->nextarc;
+            free(p);
+            return q;
+        }
+ 
+        for(j = 2;j < i;j++)
+            p = p->nextarc;
+        q = p->nextarc;
+        e.adjvex = q->data.adjvex;
+        p1 = Perpoint(*Arc,e,equalvex);
+        p1->nextarc = p->nextarc->nextarc;
+        free(p);
+        p = NULL;
+        return q;
+    }
+    return NULL;
+}
+
+
+void DeleteArc(struct ALGraph * G,VRType v,VRType w)
+{
+    int i;
+    int j;
+    
+    struct ArcNode * k;
+    
+    struct ElemType e;
+    i = LocateVex(G,v);
+    j = LocateVex(G,w);
+    
+    if(i < 0 || j < 0 || i == j)
+    {
+        printf("ERROR:找不到该顶点!");
+        exit(1);
+    }
+    
+    e.adjvex = j;
+    
+    k = DeleteElem(&G->vertices[i].firstarc,e,equalvex);
+    if(k)
+    {
+        G->arcnum--;
+        
+        if(G->kind >= 2)
+        {
+            e.adjvex = i;
+            DeleteElem(&G->vertices[j].firstarc,e,equalvex);
+        }
+
+    }
 }
